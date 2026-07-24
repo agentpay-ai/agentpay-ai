@@ -1,13 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { useMiniPay } from "@/hooks/useMiniPay";
 import { useBalance } from "@/hooks/useBalance";
 import { BalanceBar } from "@/components/BalanceBar";
-import { Bot, Image as ImageIcon, Code, Sparkles, Smartphone, CheckCircle } from "lucide-react";
+import { AgentIdentityBadge } from "@/components/AgentIdentityBadge";
+import { FeedbackModal } from "@/components/FeedbackModal";
+import { Bot, Image as ImageIcon, Code, Sparkles, Smartphone, CheckCircle, Star } from "lucide-react";
 
 export default function Home() {
   const { address, inMiniPay, connecting, connectWallet } = useMiniPay();
   const { usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+
+  function handleFeedbackSubmit(score: number, notes: string) {
+    console.log("Feedback submitted:", { score, notes });
+  }
 
   return (
     <main className="flex flex-col min-h-screen max-w-md mx-auto bg-slate-950 text-slate-100 shadow-2xl border-x border-slate-800">
@@ -19,7 +27,7 @@ export default function Home() {
         onRefresh={refetch}
       />
 
-      <div className="flex-1 p-5 space-y-6">
+      <div className="flex-1 p-5 space-y-5">
         {/* Banner */}
         <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40 p-5 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
@@ -54,11 +62,23 @@ export default function Home() {
           )}
         </div>
 
+        {/* ERC-8004 Agent Trust Badge */}
+        <AgentIdentityBadge reputationScore={98} totalReviews={142} />
+
         {/* AI Tools Grid */}
         <div className="space-y-3">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
-            Available AI Tools
-          </h2>
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Available AI Tools
+            </h2>
+            <button
+              onClick={() => setFeedbackOpen(true)}
+              className="text-xs text-amber-400 hover:text-amber-300 flex items-center space-x-1 font-medium"
+            >
+              <Star className="w-3 h-3 fill-amber-400" />
+              <span>Give Feedback</span>
+            </button>
+          </div>
 
           <div className="grid grid-cols-1 gap-3">
             {/* Chat Tool */}
@@ -112,8 +132,14 @@ export default function Home() {
         </div>
       </div>
 
+      <FeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        onSubmit={handleFeedbackSubmit}
+      />
+
       <footer className="p-4 text-center text-xs text-slate-500 border-t border-slate-900">
-        AgentPay AI • Powered by Celo MiniPay & x402
+        AgentPay AI • Powered by Celo MiniPay, x402 & ERC-8004
       </footer>
     </main>
   );

@@ -9,6 +9,7 @@ import { facilitator } from "./x402-facilitator.js";
 import { chatRoute } from "./routes/chat.js";
 import { imageRoute } from "./routes/image.js";
 import { codeRoute } from "./routes/code.js";
+import { reputationRoute } from "./routes/reputation.js";
 
 config();
 
@@ -87,6 +88,7 @@ app.get("/health", (c) => {
 app.route("/api", chatRoute);
 app.route("/api", imageRoute);
 app.route("/api", codeRoute);
+app.route("/api", reputationRoute);
 
 const port = Number(process.env.PORT) || 3001;
 
