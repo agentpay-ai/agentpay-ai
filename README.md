@@ -28,6 +28,11 @@ agentpay-ai/
 - **Payments Protocol**: x402 Celo Facilitator (`https://api.x402.celo.org`)
 - **Gas Abstraction**: CIP-64 fee abstraction using USDm/USDC
 
+> [!NOTE]
+> **Development & Multi-Model Roadmap**:  
+> The integration of Google Gemini Flash (free tier) in the current build is optimized for development, rapid testing, and hackathon evaluation. In future production iterations, AgentPay AI will support a multi-model routing network including **Claude 3.5 Opus**, **Fable GPT Sol**, **GPT-4o**, and custom fine-tuned agents via the x402 micropayment rail.
+
+
 ---
 
 ## 🚀 Quickstart
