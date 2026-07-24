@@ -13,6 +13,7 @@ node_modules/
 # Local plans & milestones (as specified by user rule)
 PLAN.md
 MILESTONE.md
+.superstack/
 
 # Next.js build output
 .next/
