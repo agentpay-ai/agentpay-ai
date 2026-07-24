@@ -58,6 +58,23 @@ jobs:
           cd apps/api
           npm test
 
+  erc8004-test:
+    name: Validate ERC-8004 Agent Identity & Schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: |
+          cd apps/api
+          npm install
+      - name: Run ERC-8004 Schema Test Suite
+        run: |
+          cd apps/api
+          npx tsx --test test/erc8004.test.ts
+
   contracts-test:
     name: Test Foundry Contracts
     runs-on: ubuntu-latest
