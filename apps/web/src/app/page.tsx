@@ -1,65 +1,120 @@
-import Image from "next/image";
+"use client";
+
+import { useMiniPay } from "@/hooks/useMiniPay";
+import { useBalance } from "@/hooks/useBalance";
+import { BalanceBar } from "@/components/BalanceBar";
+import { Bot, Image as ImageIcon, Code, Sparkles, Smartphone, CheckCircle } from "lucide-react";
 
 export default function Home() {
+  const { address, inMiniPay, connecting, connectWallet } = useMiniPay();
+  const { usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="flex flex-col min-h-screen max-w-md mx-auto bg-slate-950 text-slate-100 shadow-2xl border-x border-slate-800">
+      <BalanceBar
+        address={address}
+        usdmBalance={usdmBalance}
+        usdcBalance={usdcBalance}
+        loading={balanceLoading}
+        onRefresh={refetch}
+      />
+
+      <div className="flex-1 p-5 space-y-6">
+        {/* Banner */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40 p-5 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="inline-flex items-center space-x-1.5 bg-amber-400/10 text-amber-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-amber-400/20">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Google Gemini Flash Powered</span>
+            </span>
+            {inMiniPay && (
+              <span className="inline-flex items-center space-x-1 bg-emerald-400/10 text-emerald-400 text-xs font-medium px-2 py-0.5 rounded-full border border-emerald-400/20">
+                <CheckCircle className="w-3 h-3" />
+                <span>MiniPay Active</span>
+              </span>
+            )}
+          </div>
+
+          <h1 className="text-2xl font-bold tracking-tight text-white">
+            Pay-Per-Prompt AI
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-slate-400 text-sm leading-relaxed">
+            Instant mobile access to AI text, images, and code review using sub-cent stablecoin payments. No subscriptions.
           </p>
+
+          {!inMiniPay && !address && (
+            <button
+              onClick={connectWallet}
+              disabled={connecting}
+              className="w-full mt-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-semibold py-2.5 rounded-xl transition flex items-center justify-center space-x-2 text-sm"
+            >
+              <Smartphone className="w-4 h-4" />
+              <span>{connecting ? "Connecting..." : "Connect Celo Wallet"}</span>
+            </button>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* AI Tools Grid */}
+        <div className="space-y-3">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
+            Available AI Tools
+          </h2>
+
+          <div className="grid grid-cols-1 gap-3">
+            {/* Chat Tool */}
+            <div className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group">
+              <div className="flex items-center space-x-3.5">
+                <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20 group-hover:scale-105 transition">
+                  <Bot className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white text-sm">AI Text Assistant</h3>
+                  <p className="text-xs text-slate-400">GPT / Gemini 2.5 Flash LLM</p>
+                </div>
+              </div>
+              <span className="text-xs font-bold bg-slate-800 text-emerald-400 px-2.5 py-1 rounded-lg border border-slate-700">
+                $0.01 USDm
+              </span>
+            </div>
+
+            {/* Image Gen Tool */}
+            <div className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group">
+              <div className="flex items-center space-x-3.5">
+                <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20 group-hover:scale-105 transition">
+                  <ImageIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white text-sm">AI Image Creator</h3>
+                  <p className="text-xs text-slate-400">High-res 512×512 generation</p>
+                </div>
+              </div>
+              <span className="text-xs font-bold bg-slate-800 text-purple-400 px-2.5 py-1 rounded-lg border border-slate-700">
+                $0.05 USDm
+              </span>
+            </div>
+
+            {/* Code Review Tool */}
+            <div className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group">
+              <div className="flex items-center space-x-3.5">
+                <div className="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20 group-hover:scale-105 transition">
+                  <Code className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white text-sm">AI Code Reviewer</h3>
+                  <p className="text-xs text-slate-400">Bug & security audit</p>
+                </div>
+              </div>
+              <span className="text-xs font-bold bg-slate-800 text-sky-400 px-2.5 py-1 rounded-lg border border-slate-700">
+                $0.02 USDm
+              </span>
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+      </div>
+
+      <footer className="p-4 text-center text-xs text-slate-500 border-t border-slate-900">
+        AgentPay AI • Powered by Celo MiniPay & x402
+      </footer>
+    </main>
   );
 }
