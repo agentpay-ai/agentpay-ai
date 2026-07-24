@@ -56,7 +56,7 @@ jobs:
       - name: Run Gemini Unit Test Suite
         run: |
           cd apps/api
-          npm test
+          npm run test:gemini
 
   erc8004-test:
     name: Validate ERC-8004 Agent Identity & Schema
@@ -73,7 +73,7 @@ jobs:
       - name: Run ERC-8004 Schema Test Suite
         run: |
           cd apps/api
-          npx tsx --test test/erc8004.test.ts
+          npm run test:erc8004
 
   contracts-test:
     name: Test Foundry Contracts
