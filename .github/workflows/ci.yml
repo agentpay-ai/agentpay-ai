@@ -41,6 +41,23 @@ jobs:
           cd apps/api
           npx tsc --noEmit
 
+  gemini-test:
+    name: Validate Gemini Flash & AI Routes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: |
+          cd apps/api
+          npm install
+      - name: Run Gemini Unit Test Suite
+        run: |
+          cd apps/api
+          npm test
+
   contracts-test:
     name: Test Foundry Contracts
     runs-on: ubuntu-latest
