@@ -75,6 +75,23 @@ jobs:
           cd apps/api
           npm run test:erc8004
 
+  erc8021-test:
+    name: Validate ERC-8021 Attribution Tags & Proof of Ship Tracking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: |
+          cd apps/api
+          npm install
+      - name: Run ERC-8021 Attribution Test Suite
+        run: |
+          cd apps/api
+          npm run test:erc8021
+
   contracts-test:
     name: Test Foundry Contracts
     runs-on: ubuntu-latest
