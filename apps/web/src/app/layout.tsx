@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "@/app/globals.css";
 import { WalletProvider } from "@/components/WalletProvider";
+import { BottomNav } from "@/components/BottomNav";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,8 +25,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-amber-400 selection:text-slate-900`}>
-        <WalletProvider>{children}</WalletProvider>
+      <body className={`${inter.className} bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-amber-400 selection:text-slate-900 pb-16`}>
+        <WalletProvider>
+          {children}
+          <BottomNav />
+        </WalletProvider>
       </body>
     </html>
   );
