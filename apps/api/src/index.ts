@@ -10,6 +10,7 @@ import { chatRoute } from "./routes/chat.js";
 import { imageRoute } from "./routes/image.js";
 import { codeRoute } from "./routes/code.js";
 import { reputationRoute } from "./routes/reputation.js";
+import { attributionRoute } from "./routes/attribution.js";
 
 config();
 
@@ -89,6 +90,7 @@ app.route("/api", chatRoute);
 app.route("/api", imageRoute);
 app.route("/api", codeRoute);
 app.route("/api", reputationRoute);
+app.route("/api", attributionRoute);
 
 const port = Number(process.env.PORT) || 3001;
 
