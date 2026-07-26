@@ -92,6 +92,23 @@ jobs:
           cd apps/api
           npm run test:erc8021
 
+  ui-test:
+    name: Validate Mobile Frontend & AI Tool Workflows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: |
+          cd apps/api
+          npm install
+      - name: Run UI Integration Test Suite
+        run: |
+          cd apps/api
+          npm run test:ui
+
   contracts-test:
     name: Test Foundry Contracts
     runs-on: ubuntu-latest

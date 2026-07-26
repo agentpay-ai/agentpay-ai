@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useMiniPay } from "@/hooks/useMiniPay";
 import { useBalance } from "@/hooks/useBalance";
 import { BalanceBar } from "@/components/BalanceBar";
@@ -82,7 +83,10 @@ export default function Home() {
 
           <div className="grid grid-cols-1 gap-3">
             {/* Chat Tool */}
-            <div className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group">
+            <Link
+              href="/chat"
+              className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group"
+            >
               <div className="flex items-center space-x-3.5">
                 <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20 group-hover:scale-105 transition">
                   <Bot className="w-5 h-5" />
@@ -95,10 +99,13 @@ export default function Home() {
               <span className="text-xs font-bold bg-slate-800 text-emerald-400 px-2.5 py-1 rounded-lg border border-slate-700">
                 $0.01 USDm
               </span>
-            </div>
+            </Link>
 
             {/* Image Gen Tool */}
-            <div className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group">
+            <Link
+              href="/image"
+              className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group"
+            >
               <div className="flex items-center space-x-3.5">
                 <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20 group-hover:scale-105 transition">
                   <ImageIcon className="w-5 h-5" />
@@ -111,10 +118,13 @@ export default function Home() {
               <span className="text-xs font-bold bg-slate-800 text-purple-400 px-2.5 py-1 rounded-lg border border-slate-700">
                 $0.05 USDm
               </span>
-            </div>
+            </Link>
 
             {/* Code Review Tool */}
-            <div className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group">
+            <Link
+              href="/code"
+              className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group"
+            >
               <div className="flex items-center space-x-3.5">
                 <div className="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20 group-hover:scale-105 transition">
                   <Code className="w-5 h-5" />
@@ -127,7 +137,7 @@ export default function Home() {
               <span className="text-xs font-bold bg-slate-800 text-sky-400 px-2.5 py-1 rounded-lg border border-slate-700">
                 $0.02 USDm
               </span>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
