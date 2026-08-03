@@ -21,8 +21,8 @@ AgentPayAI is constructed as a monorepo containing three core packages: `apps/we
                         /              |               \
                        v               v                v
           +------------------+  +--------------+  +-------------------+
-          | x402 Facilitator |  | Gemini Flash |  | BotChain Agent    |
-          | Settlement Core  |  | AI Engine    |  | Relay Protocol    |
+          | x402 Facilitator |  | Gemini / AI  |  | BotChain Agent    |
+          | Settlement Core  |  | Model Engine |  | Relay Protocol    |
           +------------------+  +--------------+  +-------------------+
                        |                                |
                        v                                v
@@ -34,18 +34,18 @@ AgentPayAI is constructed as a monorepo containing three core packages: `apps/we
 
 ---
 
-## 5.2 AI Service Delivery and Upstream Model Routing Pipeline
+## 5.2 Compute Aggregation, Reselling Model, and Upstream Routing
 
-AgentPayAI delivers AI services and compute capabilities to end-users and autonomous software agents through a 3-stage execution pipeline:
+AgentPayAI operates as a decentralized compute aggregator. It procures enterprise inference access from primary AI providers (Google Gemini, Anthropic Claude, OpenAI, xAI Grok) and resells compute capabilities to end-users and autonomous software agents on a pay-per-prompt basis through a 3-stage execution pipeline:
 
-### 1. API Gateway Interception (`apps/api`)
+### 1. API Gateway Interception & Reselling Meter (`apps/api`)
 The core gateway is built on the Hono framework and edge-deployed for low-latency response times. Whenever a client interface (Next.js MiniApp) or autonomous software bot issues a request to `/api/chat`, `/api/image`, `/api/code`, or `/api/botchain/relay`, the gateway intercepts the request.
 
 Before issuing any upstream AI API calls, the gateway verifies the attached `x402` micropayment header (or $APAY token signature). If no valid payment is present, it halts execution and returns `HTTP 402 Payment Required`.
 
-### 2. Enterprise Upstream Provider Routing
-Once micropayment settlement is verified, the gateway dispatches the prompt payload to upstream AI model providers using protocol-managed, enterprise API key pools:
-- **LLM Text Completions (`/api/chat`)**: Integrates directly with the `@google/genai` SDK for Google Gemini 2.5 Flash / Flash Lite, with dynamic routing adapters for Anthropic Claude 3.5 Opus and OpenAI GPT-4o.
+### 2. Upstream Enterprise Provider Routing
+Once micropayment settlement is verified, the gateway dispatches the prompt payload to upstream AI model providers using protocol-managed API key pools:
+- **LLM Text Completions (`/api/chat`)**: Integrates directly with `@google/genai` SDK for Google Gemini 2.5 Flash / Flash Lite, with dynamic routing adapters for Anthropic Claude 3.5 Opus, OpenAI GPT-4o, and xAI Grok.
 - **AI Image Rendering (`/api/image`)**: Routes prompts through visual rendering engines (SDXL / Gemini Image / Replicate) to return high-resolution base64 or CDN image payloads.
 - **Smart Contract Code Auditing (`/api/code`)**: Combines AST-level static code parsing with specialized LLM vulnerability detection models to analyze Solidity code snippets and generate structured security risk reports.
 - **Autonomous Bot Relays (`/api/botchain/relay`)**: Programmatic JSON-RPC relay formatting machine-to-machine task payloads for BotChain agents.
@@ -65,7 +65,7 @@ The API gateway handles route protection, micropayment verification, AI inferenc
 
 | Route | Method | Price ($ / $APAY) | Upstream AI Provider | Description |
 |---|---|---|---|---|
-| `/api/chat` | POST | $0.010 / 1.0 $APAY | Google Gemini 2.5 Flash / Claude Opus | Text completion & conversation engine |
+| `/api/chat` | POST | $0.010 / 1.0 $APAY | Gemini 2.5 Flash / Claude Opus / Grok | Text completion & conversation engine |
 | `/api/image` | POST | $0.050 / 5.0 $APAY | SDXL / Gemini Image / Replicate | Image prompt enhancer & renderer |
 | `/api/code` | POST | $0.020 / 2.0 $APAY | Gemini 2.5 Flash / Audit Engine | Solidity smart contract vulnerability audit |
 | `/api/reputation` | GET / POST | Free / $0.00 | ERC-8004 Registry | Query score and submit agent ratings |

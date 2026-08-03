@@ -1,12 +1,16 @@
 # Chapter 1: Executive Summary
 
-## 1.1 Overview
+## 1.1 Overview and Operational Thesis
 
 Artificial intelligence capability is rapidly consolidating behind rigid $20-to-$30 monthly recurring subscription tiers. For billions of users across developing markets, as well as autonomous software agents operating on micro-budgets, this pricing structure represents an insurmountable economic barrier.
 
-AgentPayAI addresses this structural inefficiency by establishing an open, multi-chain micropayment protocol. The protocol converts high-throughput artificial intelligence inference—including large language model completions, synthetic image generation, and automated code audits—into sub-cent, pay-per-prompt onchain transactions settled instantaneously in stablecoins or native **$APAY** utility tokens.
+AgentPayAI addresses this structural inefficiency by operating as a **decentralized AI compute aggregator and micropayment gateway**:
 
-By decoupling access from monthly commitments, providing native token utility ($APAY fee discounts and staking), and attaching cryptographic proof of execution to every request, AgentPayAI establishes a universal payment and identity layer for human users and autonomous agents alike.
+1. **Bulk Compute Aggregation**: AgentPayAI secures enterprise API inference access from major AI model providers (Google Gemini, Anthropic Claude, OpenAI GPT-4o, xAI Grok, and synthetic image generators).
+2. **Fractionalization and Reselling**: The protocol fractionalizes bulk AI inference into granular, sub-cent pay-per-prompt units ($0.01 to $0.05 per call).
+3. **Onchain Micropayment Rail**: End-users and autonomous software bots purchase compute on-demand using self-custodial Web3 wallets (such as Celo MiniPay and BotChain wallets) settled in stablecoins (USDm/USDC) or native **$APAY** tokens via the x402 HTTP payment protocol.
+
+By decoupling access from monthly recurring SaaS subscriptions, providing native token utility ($APAY prompt fee discounts and staking), and attaching cryptographic proof of execution to every request, AgentPayAI establishes a universal payment and identity layer for human users and autonomous agents alike.
 
 ---
 
@@ -30,7 +34,7 @@ The AgentPayAI protocol introduces four primary technical innovations:
 1. **Dual-Engine Settlement Core**: Simultaneous support for Celo MiniPay (CIP-64 gas fee abstraction, x402 HTTP 402 payment protocol) and BotChain EVM execution environments.
 2. **Sub-Cent Unit Economics & $APAY Utility**: Transaction settlement costs scaled down to $0.01 USDm (or discounted $APAY tokens) for text prompts, $0.02 USDm for code audits, and $0.05 USDm for high-resolution image rendering.
 3. **Cryptographic Builder Attribution**: ERC-8021 metadata tags appended to transaction call data, providing immutable onchain proof of origin for leaderboard indexing and grant allocation tracking.
-4. **Multi-Model Intelligence Network**: A modular gateway architecture capable of dynamically routing queries between cost-effective development tiers (Google Gemini 2.5 Flash) and high-reasoning production models (Claude 3.5 Opus, GPT-4o).
+4. **Multi-Model Intelligence Network**: A modular gateway architecture capable of dynamically routing queries between cost-effective development tiers (Google Gemini 2.5 Flash) and high-reasoning production models (Claude 3.5 Opus, GPT-4o, Grok).
 
 ---
 
