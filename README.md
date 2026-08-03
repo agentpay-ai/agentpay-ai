@@ -10,16 +10,20 @@
 
 AgentPayAI is a mobile-first, multi-chain AI MiniApp and autonomous agent payment gateway built for both the **BotChain** AI agent ecosystem ([botchain.notion.site/bot-chain-ecosystem-support-program-en](https://botchain.notion.site/bot-chain-ecosystem-support-program-en), [dev-docs.botchain.ai](https://dev-docs.botchain.ai/)) and **Celo MiniPay** users.
 
-It provides pay-as-you-go access to premium AI models (LLM text completion via Google Gemini 2.5 Flash, AI image creation, and smart contract code review) using sub-cent stablecoin micropayments, eliminating recurring monthly subscriptions.
+AgentPayAI operates as a **decentralized AI compute aggregator and micropayment gateway**:
+1. **Bulk Compute Aggregation**: Procures enterprise API inference access from major AI model providers (Google Gemini, Anthropic Claude, OpenAI GPT-4o, xAI Grok).
+2. **Fractionalization and Reselling**: Fractionalizes bulk compute into sub-cent, pay-per-prompt units ($0.01 to $0.05 per call) resold directly to mobile users and autonomous software agents.
+3. **Onchain Micropayment Rail**: Settles transactions ondemand in stablecoins (USDm/USDC) or native **$APAY** tokens via x402 HTTP payment signatures—requiring no credit cards or recurring monthly SaaS subscriptions.
 
-Every prompt is verified and settled onchain in stablecoins (USDm / USDC) with native **ERC-8004** agent identity trust and **ERC-8021** builder attribution tracking.
+Every prompt is verified and settled onchain with native **ERC-8004** agent identity trust and **ERC-8021** builder attribution tracking.
 
 ---
 
-## AgentPayAI Whitepaper
+## AgentPayAI Whitepaper & GitBook Suite
 
-The complete technical whitepaper and GitBook documentation suite is available in the [`docs/`](docs/README.md) directory:
+The complete technical whitepaper and GitBook documentation suite is available in the [`docs/`](docs/README.md) directory and live on GitBook:
 
+- **GitBook Space**: [app.gitbook.com/o/VbOtqOH2baqFJOkGZob9/s/jXrKr6TMx22gaie4amuM/](https://app.gitbook.com/o/VbOtqOH2baqFJOkGZob9/s/jXrKr6TMx22gaie4amuM/)
 - **[AgentPayAI Whitepaper Cover](docs/README.md)**
 - **[GitBook Navigation Manifest](docs/SUMMARY.md)**
 - **[Chapter 1: Executive Summary](docs/01-executive-summary.md)**
@@ -27,8 +31,21 @@ The complete technical whitepaper and GitBook documentation suite is available i
 - **[Chapter 3: BotChain Protocol Integration and Infrastructure Grant Alignment](docs/03-botchain-protocol-integration.md)**
 - **[Chapter 4: Celo MiniPay and x402 Micropayment Engine](docs/04-celo-minipay-and-x402-engine.md)**
 - **[Chapter 5: Technical Architecture and Smart Contracts](docs/05-technical-architecture.md)**
-- **[Chapter 6: Economic Model and Grant Allocation](docs/06-economic-model-and-grants.md)**
+- **[Chapter 6: Economic Model, Tokenomics and Grant Allocation](docs/06-economic-model-and-grants.md)**
 - **[Chapter 7: Roadmap, Multi-Model Network and Governance](docs/07-roadmap-and-future-vision.md)**
+
+---
+
+## Dynamic Prompt Pricing Formula
+
+The gateway calculates prompt pricing dynamically using a 4-parameter formula:
+
+$$\text{Price}_{\text{User}} = (\text{Cost}_{\text{Provider}} + \text{Cost}_{\text{Gas}}) \times (1 + \text{Margin}_{\text{Protocol}}) \times (1 - \text{Discount}_{\text{Token}})$$
+
+- **$\text{Cost}_{\text{Provider}}$**: Dynamic upstream compute cost based on prompt token count or raw image render unit.
+- **$\text{Cost}_{\text{Gas}}$**: Fixed sub-cent transaction cost (~$0.0005 USDm) using Celo CIP-64 gas fee abstraction or BotChain EVM execution.
+- **$\text{Margin}_{\text{Protocol}}$**: Fixed protocol margin to cover gateway edge infrastructure, API reserves, and 15% automated $APAY buyback-and-burn mechanisms.
+- **$\text{Discount}_{\text{Token}}$**: 20% discount for direct $APAY token settlement plus additional 10%–25% reductions for staked $APAY tiers.
 
 ---
 
@@ -60,7 +77,7 @@ agentpay-ai/
 - **Attribution & Gas Abstraction**: ERC-8021 Attribution Tags, CIP-64 gas abstraction
 
 > Note on Multi-Model Roadmap:  
-> The integration of Google Gemini Flash (free tier) in the current build is optimized for development and rapid testing. Production iterations will support a multi-model routing network including **Claude 3.5 Opus**, **Fable GPT Sol**, and **GPT-4o**.
+> The integration of Google Gemini Flash (free tier) in the current build is optimized for development and rapid testing. Production iterations will support a multi-model routing network including **Claude 3.5 Opus**, **Fable GPT Sol**, **GPT-4o**, and **xAI Grok**.
 
 ---
 
