@@ -6,5 +6,5 @@
 * [Chapter 3: BotChain Protocol Integration and Infrastructure Grant Alignment](03-botchain-protocol-integration.md)
 * [Chapter 4: Celo MiniPay and x402 Micropayment Engine](04-celo-minipay-and-x402-engine.md)
 * [Chapter 5: Technical Architecture and Smart Contracts](05-technical-architecture.md)
-* [Chapter 6: Economic Model and Grant Allocation](06-economic-model-and-grants.md)
+* [Chapter 6: Economic Model, Tokenomics and Grant Allocation](06-economic-model-and-grants.md)
 * [Chapter 7: Roadmap, Multi-Model Network and Governance](07-roadmap-and-future-vision.md)
