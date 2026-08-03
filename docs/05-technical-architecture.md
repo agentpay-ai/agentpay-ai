@@ -34,24 +34,47 @@ AgentPayAI is constructed as a monorepo containing three core packages: `apps/we
 
 ---
 
-## 5.2 Hono API Gateway Specification (`apps/api`)
+## 5.2 AI Service Delivery and Upstream Model Routing Pipeline
+
+AgentPayAI delivers AI services and compute capabilities to end-users and autonomous software agents through a 3-stage execution pipeline:
+
+### 1. API Gateway Interception (`apps/api`)
+The core gateway is built on the Hono framework and edge-deployed for low-latency response times. Whenever a client interface (Next.js MiniApp) or autonomous software bot issues a request to `/api/chat`, `/api/image`, `/api/code`, or `/api/botchain/relay`, the gateway intercepts the request.
+
+Before issuing any upstream AI API calls, the gateway verifies the attached `x402` micropayment header (or $APAY token signature). If no valid payment is present, it halts execution and returns `HTTP 402 Payment Required`.
+
+### 2. Enterprise Upstream Provider Routing
+Once micropayment settlement is verified, the gateway dispatches the prompt payload to upstream AI model providers using protocol-managed, enterprise API key pools:
+- **LLM Text Completions (`/api/chat`)**: Integrates directly with the `@google/genai` SDK for Google Gemini 2.5 Flash / Flash Lite, with dynamic routing adapters for Anthropic Claude 3.5 Opus and OpenAI GPT-4o.
+- **AI Image Rendering (`/api/image`)**: Routes prompts through visual rendering engines (SDXL / Gemini Image / Replicate) to return high-resolution base64 or CDN image payloads.
+- **Smart Contract Code Auditing (`/api/code`)**: Combines AST-level static code parsing with specialized LLM vulnerability detection models to analyze Solidity code snippets and generate structured security risk reports.
+- **Autonomous Bot Relays (`/api/botchain/relay`)**: Programmatic JSON-RPC relay formatting machine-to-machine task payloads for BotChain agents.
+
+### 3. Execution, Payload Fulfillment, and Onchain Logging
+Upon receiving the inference output from upstream model providers:
+1. **Response Stream**: The gateway returns the AI response (JSON payload or rendered image) immediately back to the client app UI or autonomous bot relay.
+2. **Asynchronous Ledger Update**: Simultaneously, the gateway issues an asynchronous transaction to `AgentPayRegistry.sol` onchain (Celo or BotChain EVM), recording the prompt execution event, user address, service type, and timestamp.
+
+---
+
+## 5.3 Hono API Gateway Specification (`apps/api`)
 
 The API gateway handles route protection, micropayment verification, AI inference orchestration, and event logging.
 
 ### Endpoint Overview
 
-| Route | Method | Price | Description |
-|---|---|---|---|
-| `/api/chat` | POST | $0.01 USDm | Text generation using Google Gemini 2.5 Flash |
-| `/api/image` | POST | $0.05 USDm | Image generation prompt enhancer and rendering |
-| `/api/code` | POST | $0.02 USDm | Automated smart contract vulnerability audit |
-| `/api/reputation` | GET / POST | Free / $0.00 | Query ERC-8004 score and submit ratings |
-| `/api/attribution/tag` | GET | Free | Retrieve signed ERC-8021 calldata suffix |
-| `/api/botchain/relay` | POST | Dynamic | Programmatic bot task relay for BotChain agents |
+| Route | Method | Price ($ / $APAY) | Upstream AI Provider | Description |
+|---|---|---|---|---|
+| `/api/chat` | POST | $0.010 / 1.0 $APAY | Google Gemini 2.5 Flash / Claude Opus | Text completion & conversation engine |
+| `/api/image` | POST | $0.050 / 5.0 $APAY | SDXL / Gemini Image / Replicate | Image prompt enhancer & renderer |
+| `/api/code` | POST | $0.020 / 2.0 $APAY | Gemini 2.5 Flash / Audit Engine | Solidity smart contract vulnerability audit |
+| `/api/reputation` | GET / POST | Free / $0.00 | ERC-8004 Registry | Query score and submit agent ratings |
+| `/api/attribution/tag` | GET | Free | ERC-8021 Engine | Retrieve signed calldata suffix |
+| `/api/botchain/relay` | POST | Dynamic | BotChain Agent Protocol | Programmatic bot task relay |
 
 ---
 
-## 5.3 Smart Contract Implementation (`AgentPayRegistry.sol`)
+## 5.4 Smart Contract Implementation (`AgentPayRegistry.sol`)
 
 The `AgentPayRegistry.sol` contract provides an onchain ledger of prompt executions and micropayments across Celo and BotChain EVM networks.
 
@@ -87,7 +110,7 @@ contract AgentPayRegistry is Ownable, Pausable {
      * @param user Address of the user or bot invoking the prompt
      * @param tool Identifer string of the AI tool consumed
      * @param amount Micropayment value in token base units
-     * @param asset Address of the payment token (USDm / USDC)
+     * @param asset Address of the payment token (USDm / USDC / APAY)
      * @param chainId EVM Chain ID where transaction originated
      */
     function recordPrompt(
@@ -117,7 +140,7 @@ contract AgentPayRegistry is Ownable, Pausable {
 
 ---
 
-## 5.4 Foundry Build and Multi-Chain RPC Configuration
+## 5.5 Foundry Build and Multi-Chain RPC Configuration
 
 The contract compilation target uses Solidity `0.8.24` with EVM version `cancun`. Multi-chain deployment targets are configured within `foundry.toml`:
 
