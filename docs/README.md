@@ -42,11 +42,3 @@ Designed for seamless deployment across **BotChain's Autonomous AI Agent Network
    Eleven-phase development schedule (Phases 0 through 11), \$APAY token deployment, multi-model routing network (Claude 3.5 Opus, GPT-4o, Gemini 2.5 Flash), and decentralized governance models.
 
 ---
-
-## System Information
-
-- **Organization Repository**: [github.com/agentpay-ai/agentpay-ai](https://github.com/agentpay-ai/agentpay-ai)
-- **GitBook Deployment Space**: [app.gitbook.com/o/VbOtqOH2baqFJOkGZob9/s/jXrKr6TMx22gaie4amuM/](https://app.gitbook.com/o/VbOtqOH2baqFJOkGZob9/s/jXrKr6TMx22gaie4amuM/)
-- **BotChain Documentation**: [dev-docs.botchain.ai](https://dev-docs.botchain.ai/)
-- **BotChain Program Specification**: [botchain.notion.site/bot-chain-ecosystem-support-program-en](https://botchain.notion.site/bot-chain-ecosystem-support-program-en)
-- **Celo Documentation**: [docs.celo.org](https://docs.celo.org)
