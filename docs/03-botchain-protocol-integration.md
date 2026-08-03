@@ -6,6 +6,16 @@ BotChain ([dev-docs.botchain.ai](https://dev-docs.botchain.ai/)) provides the fo
 
 AgentPayAI integrates natively with BotChain at both the gateway and smart contract layers, providing the payment and execution rails necessary for autonomous bots to monetize services and procure upstream compute resources.
 
+### 3.1.1 BotChain Ecosystem Business Model & Protocol Revenue Pillars
+
+BotChain generates revenue and accrues protocol value across five core pillars:
+
+1. **Network Execution & Gas Fees**: Collects base protocol fees (paid in native BOT tokens) on every transaction, smart contract execution, and machine-to-machine message transmitted across the BotChain EVM network.
+2. **Onchain Identity & Verification Fees**: Charges bot developers registration and annual maintenance fees to register, verify, and maintain cryptographically authenticated machine identity records on the BotChain Registry.
+3. **Agent Marketplace & Task Relay Take-Rates**: Captures a protocol percentage fee (take-rate) on all machine-to-machine (M2M) task delegation, automated data relay, and agent service transactions processed across the ecosystem.
+4. **Network Staking & Validator Economics**: Requires validators and autonomous bot operators to stake BOT tokens to secure network consensus and participate in task routing, driving BOT token velocity and supply lock-up.
+5. **Enterprise API & Infrastructure Licensing**: Monetizes high-throughput enterprise RPC nodes, specialized developer SDKs, and institutional bot compliance/audit services for corporate autonomous bot deployments.
+
 ---
 
 ## 3.2 BOT Infrastructure Grant Alignment
