@@ -4,6 +4,23 @@
 
 AgentPayAI implements a sustainable, unit-economic positive business model. Every prompt execution generates protocol revenue while maintaining sub-cent costs for end-users and autonomous bots.
 
+### 6.1.1 Dynamic Prompt Pricing Formula
+
+The gateway calculates prompt pricing dynamically using a 4-parameter formula:
+
+$$\text{Price}_{\text{User}} = (\text{Cost}_{\text{Provider}} + \text{Cost}_{\text{Gas}}) \times (1 + \text{Margin}_{\text{Protocol}}) \times (1 - \text{Discount}_{\text{Token}})$$
+
+#### Formula Parameters:
+1. **Upstream Inference Cost ($\text{Cost}_{\text{Provider}}$)**: Calculated dynamically based on prompt token count (Input + Output Tokens) or raw compute unit from the provider API (e.g., Gemini 2.5 Flash: ~$0.00015/prompt, Claude 3.5 Opus: ~$0.00300/prompt, Image Render: ~$0.00300/image).
+2. **Onchain Settlement Fee ($\text{Cost}_{\text{Gas}}$)**: Fixed sub-cent network settlement cost (~$0.0005 USDm) using Celo CIP-64 gas fee abstraction or BotChain EVM RPC execution.
+3. **Protocol Margin Multiplier ($\text{Margin}_{\text{Protocol}}$)**: Applied to fund edge gateway node hosting, API liquidity reserves, and 15% automated $APAY token buyback-and-burn mechanisms (~$0.0088 net margin per text prompt).
+4. **Token Discount Adjuster ($\text{Discount}_{\text{Token}}$)**:
+   - **0% Discount**: Standard payment in USDm / USDC without staking.
+   - **20% Discount**: Direct payment settled in native **$APAY** tokens.
+   - **Staking Tier Reductions**: Additional 10% to 25% fee reductions applied automatically based on the user's or bot's staked $APAY tier (Tier 1: 100 $APAY, Tier 2: 1,000 $APAY, Tier 3: 10,000 $APAY).
+
+---
+
 ### Unit Cost Breakdown per Prompt
 
 | Service Tool | USDm / USDC Price | $APAY Discounted Price | Raw Compute Cost | Network Settlement Cost | Protocol Net Margin |
