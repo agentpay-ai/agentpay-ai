@@ -12,8 +12,8 @@ AgentPayAI is a mobile-first, multi-chain AI MiniApp and autonomous agent paymen
 
 AgentPayAI operates as a **decentralized AI compute aggregator and micropayment gateway**:
 1. **Bulk Compute Aggregation**: Procures enterprise API inference access from major AI model providers (Google Gemini, Anthropic Claude, OpenAI GPT-4o, xAI Grok).
-2. **Fractionalization and Reselling**: Fractionalizes bulk compute into sub-cent, pay-per-prompt units ($0.01 to $0.05 per call) resold directly to mobile users and autonomous software agents.
-3. **Onchain Micropayment Rail**: Settles transactions ondemand in stablecoins (USDm/USDC) or native **$APAY** tokens via x402 HTTP payment signatures—requiring no credit cards or recurring monthly SaaS subscriptions.
+2. **Fractionalization and Reselling**: Fractionalizes bulk compute into sub-cent, pay-per-prompt units (\$0.01 to \$0.05 per call) resold directly to mobile users and autonomous software agents.
+3. **Onchain Micropayment Rail**: Settles transactions ondemand in stablecoins (USDm/USDC) or native **\$APAY** tokens via x402 HTTP payment signatures—requiring no credit cards or recurring monthly SaaS subscriptions.
 
 Every prompt is verified and settled onchain with native **ERC-8004** agent identity trust and **ERC-8021** builder attribution tracking.
 
@@ -40,12 +40,14 @@ The complete technical whitepaper and GitBook documentation suite is available i
 
 The gateway calculates prompt pricing dynamically using a 4-parameter formula:
 
-$$\text{Price}_{\text{User}} = (\text{Cost}_{\text{Provider}} + \text{Cost}_{\text{Gas}}) \times (1 + \text{Margin}_{\text{Protocol}}) \times (1 - \text{Discount}_{\text{Token}})$$
+$$
+\text{Price}_{\text{User}} = (\text{Cost}_{\text{Provider}} + \text{Cost}_{\text{Gas}}) \times (1 + \text{Margin}_{\text{Protocol}}) \times (1 - \text{Discount}_{\text{Token}})
+$$
 
 - **$\text{Cost}_{\text{Provider}}$**: Dynamic upstream compute cost based on prompt token count or raw image render unit.
-- **$\text{Cost}_{\text{Gas}}$**: Fixed sub-cent transaction cost (~$0.0005 USDm) using Celo CIP-64 gas fee abstraction or BotChain EVM execution.
-- **$\text{Margin}_{\text{Protocol}}$**: Fixed protocol margin to cover gateway edge infrastructure, API reserves, and 15% automated $APAY buyback-and-burn mechanisms.
-- **$\text{Discount}_{\text{Token}}$**: 20% discount for direct $APAY token settlement plus additional 10%–25% reductions for staked $APAY tiers.
+- **$\text{Cost}_{\text{Gas}}$**: Fixed sub-cent transaction cost (~\$0.0005 USDm) using Celo CIP-64 gas fee abstraction or BotChain EVM execution.
+- **$\text{Margin}_{\text{Protocol}}$**: Fixed protocol margin to cover gateway edge infrastructure, API reserves, and 15% automated \$APAY buyback-and-burn mechanisms.
+- **$\text{Discount}_{\text{Token}}$**: 20% discount for direct \$APAY token settlement plus additional 10%–25% reductions for staked \$APAY tiers.
 
 ---
 
