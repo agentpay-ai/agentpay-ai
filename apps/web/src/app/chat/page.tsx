@@ -9,7 +9,7 @@ import Link from "next/link";
 
 export default function ChatPage() {
   const { address } = useWallet();
-  const { usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
+  const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,11 +28,9 @@ export default function ChatPage() {
       const data = await res.json();
       if (data.response) {
         setResponse(data.response);
-      } else {
-        setResponse("AI Response: " + (data.message || "Prompt processed successfully via Gemini 2.5 Flash."));
       }
-    } catch {
-      setResponse("AI Assistant: Google Gemini 2.5 Flash processed your request successfully ($0.01 USDm).");
+    } catch (err) {
+      console.error("Chat error:", err);
     } finally {
       setLoading(false);
     }
@@ -42,6 +40,7 @@ export default function ChatPage() {
     <main className="flex flex-col min-h-screen max-w-md mx-auto bg-slate-950 text-slate-100 shadow-2xl border-x border-slate-800">
       <BalanceBar
         address={address}
+        botBalance={botBalance}
         usdmBalance={usdmBalance}
         usdcBalance={usdcBalance}
         loading={balanceLoading}
