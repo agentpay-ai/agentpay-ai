@@ -2,27 +2,32 @@
 
 import { ReactNode, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createConfig, http, WagmiProvider } from "wagmi";
-import { botChain, botChainTestnet, celo, celoSepolia } from "@/lib/chains";
-
-const wagmiConfig = createConfig({
-  chains: [botChainTestnet, botChain, celo, celoSepolia],
-  transports: {
-    [botChainTestnet.id]: http("https://rpc.bohr.life"),
-    [botChain.id]: http("https://rpc.botchain.ai"),
-    [celo.id]: http("https://forno.celo.org"),
-    [celoSepolia.id]: http("https://forno.celo-sepolia.celo-testnet.org"),
-  },
-});
+import { PrivyProvider } from "@privy-io/react-auth";
+import { botChainTestnet, botChain, celo, celoSepolia } from "@/lib/chains";
 
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
+  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "clp1234567890123456789012";
 
   return (
-    <WagmiProvider config={wagmiConfig}>
+    <PrivyProvider
+      appId={appId}
+      config={{
+        appearance: {
+          theme: "dark",
+          accentColor: "#8b5cf6",
+          logo: "https://agentpay-ai.vercel.app/icon.png",
+        },
+        supportedChains: [botChainTestnet, botChain, celo, celoSepolia],
+        defaultChain: botChainTestnet,
+        embeddedWallets: {
+          createOnLogin: "users-without-wallets",
+        },
+      }}
+    >
       <QueryClientProvider client={queryClient}>
         {children}
       </QueryClientProvider>
-    </WagmiProvider>
+    </PrivyProvider>
   );
 }

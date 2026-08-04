@@ -7,8 +7,8 @@ import { BottomNav } from "@/components/BottomNav";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AgentPay AI — Pay-Per-Prompt AI on MiniPay",
-  description: "Mobile-first pay-as-you-go AI tools powered by Celo stablecoin micropayments.",
+  title: "AgentPay AI — Pay-Per-Prompt AI on BotChain",
+  description: "AI agent infrastructure powered by BotChain micropayments and multi-chain stablecoin settlement.",
 };
 
 export const viewport: Viewport = {
@@ -24,8 +24,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-amber-400 selection:text-slate-900 pb-16`}>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body
+        className={`${inter.className} bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-amber-400 selection:text-slate-900 pb-16`}
+        suppressHydrationWarning
+      >
         <WalletProvider>
           {children}
           <BottomNav />

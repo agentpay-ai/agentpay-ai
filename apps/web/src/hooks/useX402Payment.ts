@@ -10,6 +10,15 @@ type SignTypedDataParams = Parameters<
   ReturnType<typeof createWalletClient>["signTypedData"]
 >[0];
 
+interface EthereumProvider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+}
+
+function getEthereum(): EthereumProvider | undefined {
+  if (typeof window === "undefined") return undefined;
+  return window.ethereum as unknown as EthereumProvider | undefined;
+}
+
 export function useX402Payment() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +28,8 @@ export function useX402Payment() {
     url: string,
     options: RequestInit = {}
   ): Promise<T> {
-    if (typeof window === "undefined" || !window.ethereum) {
+    const ethereum = getEthereum();
+    if (!ethereum) {
       throw new Error("Web3 / BotChain wallet not available");
     }
 
@@ -28,7 +38,7 @@ export function useX402Payment() {
     setTxHash(null);
 
     try {
-      const accounts = (await window.ethereum.request({
+      const accounts = (await ethereum.request({
         method: "eth_requestAccounts",
       })) as string[];
       const account = accounts[0] as `0x${string}`;
@@ -40,7 +50,7 @@ export function useX402Payment() {
       const walletClient = createWalletClient({
         account,
         chain: botChainTestnet,
-        transport: custom(window.ethereum),
+        transport: custom(ethereum as unknown as Parameters<typeof custom>[0]),
       });
 
       const signer = {
