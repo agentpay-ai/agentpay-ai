@@ -10,7 +10,7 @@ import { FeedbackModal } from "@/components/FeedbackModal";
 import { Bot, Image as ImageIcon, Code, Sparkles, Smartphone, CheckCircle, Star, Cpu } from "lucide-react";
 
 export default function Home() {
-  const { address, inMiniPay, connecting, connectWallet } = useWallet();
+  const { address, inMiniPay, connecting, connectWallet, disconnectWallet, switchOrAddBotChain } = useWallet();
   const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
@@ -27,6 +27,8 @@ export default function Home() {
         usdcBalance={usdcBalance}
         loading={balanceLoading}
         onRefresh={refetch}
+        onDisconnect={disconnectWallet}
+        onSwitchNetwork={() => switchOrAddBotChain(true)}
       />
 
       <div className="flex-1 p-5 space-y-5">
@@ -56,7 +58,7 @@ export default function Home() {
             Pay-per-prompt AI access hub on BotChain EVM for text completions, image generation, and code security audits. Sub-cent micro-transactions with zero subscriptions.
           </p>
 
-          {!address && (
+          {!address ? (
             <button
               onClick={connectWallet}
               disabled={connecting}
@@ -65,6 +67,19 @@ export default function Home() {
               <Smartphone className="w-4 h-4" />
               <span>{connecting ? "Connecting..." : "Connect Wallet"}</span>
             </button>
+          ) : (
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xs text-emerald-400 font-medium flex items-center space-x-1">
+                <CheckCircle className="w-3.5 h-3.5" />
+                <span>Wallet Connected</span>
+              </span>
+              <button
+                onClick={disconnectWallet}
+                className="text-xs text-slate-400 hover:text-red-400 transition"
+              >
+                Disconnect
+              </button>
+            </div>
           )}
         </div>
 

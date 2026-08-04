@@ -8,7 +8,7 @@ import { Bot, Send, Sparkles, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function ChatPage() {
-  const { address } = useWallet();
+  const { address, disconnectWallet, switchOrAddBotChain } = useWallet();
   const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState<string | null>(null);
@@ -45,6 +45,8 @@ export default function ChatPage() {
         usdcBalance={usdcBalance}
         loading={balanceLoading}
         onRefresh={refetch}
+        onDisconnect={disconnectWallet}
+        onSwitchNetwork={() => switchOrAddBotChain(true)}
       />
 
       <div className="p-4 border-b border-slate-800 flex items-center justify-between">

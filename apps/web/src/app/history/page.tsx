@@ -7,7 +7,7 @@ import { History, ExternalLink, ShieldCheck, CheckCircle2, ArrowLeft } from "luc
 import Link from "next/link";
 
 export default function HistoryPage() {
-  const { address } = useWallet();
+  const { address, disconnectWallet, switchOrAddBotChain } = useWallet();
   const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
 
   const mockHistory = [
@@ -46,6 +46,8 @@ export default function HistoryPage() {
         usdcBalance={usdcBalance}
         loading={balanceLoading}
         onRefresh={refetch}
+        onDisconnect={disconnectWallet}
+        onSwitchNetwork={() => switchOrAddBotChain(true)}
       />
 
       <div className="p-4 border-b border-slate-800 flex items-center justify-between">
