@@ -24,8 +24,6 @@ export default function Home() {
     botBalance,
     usdtBalance,
     bousdtBalance,
-    usdmBalance,
-    usdcBalance,
     loading: balanceLoading,
     refetch,
   } = useBalance(address, currentChainId);
@@ -42,8 +40,6 @@ export default function Home() {
         botBalance={botBalance}
         usdtBalance={usdtBalance}
         bousdtBalance={bousdtBalance}
-        usdmBalance={usdmBalance}
-        usdcBalance={usdcBalance}
         loading={balanceLoading}
         onRefresh={refetch}
         onDisconnect={disconnectWallet}
@@ -138,7 +134,7 @@ export default function Home() {
                 </div>
               </div>
               <span className="text-xs font-bold bg-slate-800 text-emerald-400 px-2.5 py-1 rounded-lg border border-slate-700">
-                $0.01 USDm
+                $0.01 USDT
               </span>
             </Link>
 
@@ -157,7 +153,7 @@ export default function Home() {
                 </div>
               </div>
               <span className="text-xs font-bold bg-slate-800 text-purple-400 px-2.5 py-1 rounded-lg border border-slate-700">
-                $0.05 USDm
+                $0.05 USDT
               </span>
             </Link>
 
@@ -176,7 +172,7 @@ export default function Home() {
                 </div>
               </div>
               <span className="text-xs font-bold bg-slate-800 text-sky-400 px-2.5 py-1 rounded-lg border border-slate-700">
-                $0.02 USDm
+                $0.02 USDT
               </span>
             </Link>
           </div>

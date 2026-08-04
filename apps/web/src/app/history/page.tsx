@@ -12,8 +12,6 @@ export default function HistoryPage() {
     botBalance,
     usdtBalance,
     bousdtBalance,
-    usdmBalance,
-    usdcBalance,
     loading: balanceLoading,
     refetch,
   } = useBalance(address, currentChainId);
@@ -22,7 +20,7 @@ export default function HistoryPage() {
     {
       id: "1",
       tool: "AI Text Assistant",
-      amount: "$0.01 USDm",
+      amount: "$0.01 USDT",
       timestamp: "2 mins ago",
       txHash: "0x3f7a1b...89c2",
       status: "Settled (BotChain)",
@@ -30,7 +28,7 @@ export default function HistoryPage() {
     {
       id: "2",
       tool: "AI Image Creator",
-      amount: "$0.05 USDm",
+      amount: "$0.05 USDT",
       timestamp: "15 mins ago",
       txHash: "0x9e2c4d...11a4",
       status: "Settled (BotChain)",
@@ -38,7 +36,7 @@ export default function HistoryPage() {
     {
       id: "3",
       tool: "AI Code Reviewer",
-      amount: "$0.02 USDm",
+      amount: "$0.02 USDT",
       timestamp: "1 hour ago",
       txHash: "0x6a8f0b...55d9",
       status: "Settled (BotChain)",
@@ -52,8 +50,6 @@ export default function HistoryPage() {
         botBalance={botBalance}
         usdtBalance={usdtBalance}
         bousdtBalance={bousdtBalance}
-        usdmBalance={usdmBalance}
-        usdcBalance={usdcBalance}
         loading={balanceLoading}
         onRefresh={refetch}
         onDisconnect={disconnectWallet}

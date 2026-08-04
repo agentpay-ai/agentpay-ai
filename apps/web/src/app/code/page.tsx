@@ -8,8 +8,14 @@ import { Code, Sparkles, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 export default function CodePage() {
-  const { address, disconnectWallet, switchOrAddBotChain } = useWallet();
-  const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
+  const { address, currentChainId, isTestnet, disconnectWallet, switchOrAddBotChain } = useWallet();
+  const {
+    botBalance,
+    usdtBalance,
+    bousdtBalance,
+    loading: balanceLoading,
+    refetch,
+  } = useBalance(address, currentChainId);
   const [codeSnippet, setCodeSnippet] = useState("");
   const [loading, setLoading] = useState(false);
   const [auditResult, setAuditResult] = useState<string | null>(null);
@@ -32,7 +38,7 @@ export default function CodePage() {
         setAuditResult("Audit Complete: No high-severity vulnerabilities detected in analyzed contract scope.");
       }
     } catch {
-      setAuditResult("Audit Complete: Gemini 2.5 Flash scanned code snippet ($0.02 USDm). Zero critical exploits found.");
+      setAuditResult("Audit Complete: Gemini 2.5 Flash scanned code snippet ($0.02 USDT). Zero critical exploits found.");
     } finally {
       setLoading(false);
     }
@@ -43,12 +49,14 @@ export default function CodePage() {
       <BalanceBar
         address={address}
         botBalance={botBalance}
-        usdmBalance={usdmBalance}
-        usdcBalance={usdcBalance}
+        usdtBalance={usdtBalance}
+        bousdtBalance={bousdtBalance}
         loading={balanceLoading}
         onRefresh={refetch}
         onDisconnect={disconnectWallet}
-        onSwitchNetwork={() => switchOrAddBotChain(true)}
+        currentChainId={currentChainId}
+        isTestnet={isTestnet}
+        onSwitchNetwork={(targetTestnet) => switchOrAddBotChain(targetTestnet)}
       />
 
       <div className="p-4 border-b border-slate-800 flex items-center justify-between">
@@ -62,7 +70,7 @@ export default function CodePage() {
           </div>
         </div>
         <span className="text-xs font-bold bg-slate-900 text-sky-400 px-2.5 py-1 rounded-lg border border-slate-800">
-          $0.02 USDm
+          $0.02 USDT
         </span>
       </div>
 
@@ -73,7 +81,7 @@ export default function CodePage() {
             <span>Automated Bug & Security Audit</span>
           </div>
           <p className="text-slate-400">
-            Paste Solidity or TypeScript code for conciseness and vulnerability checks. Each review costs $0.02 USDm via x402.
+            Paste Solidity or TypeScript code for security analysis. Each audit costs $0.02 USDT via x402 on BotChain.
           </p>
         </div>
 

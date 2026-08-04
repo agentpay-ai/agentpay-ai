@@ -8,8 +8,14 @@ import { Image as ImageIcon, Sparkles, Loader2, ArrowLeft, Download } from "luci
 import Link from "next/link";
 
 export default function ImagePage() {
-  const { address, disconnectWallet, switchOrAddBotChain } = useWallet();
-  const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
+  const { address, currentChainId, isTestnet, disconnectWallet, switchOrAddBotChain } = useWallet();
+  const {
+    botBalance,
+    usdtBalance,
+    bousdtBalance,
+    loading: balanceLoading,
+    refetch,
+  } = useBalance(address, currentChainId);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -43,12 +49,14 @@ export default function ImagePage() {
       <BalanceBar
         address={address}
         botBalance={botBalance}
-        usdmBalance={usdmBalance}
-        usdcBalance={usdcBalance}
+        usdtBalance={usdtBalance}
+        bousdtBalance={bousdtBalance}
         loading={balanceLoading}
         onRefresh={refetch}
         onDisconnect={disconnectWallet}
-        onSwitchNetwork={() => switchOrAddBotChain(true)}
+        currentChainId={currentChainId}
+        isTestnet={isTestnet}
+        onSwitchNetwork={(targetTestnet) => switchOrAddBotChain(targetTestnet)}
       />
 
       <div className="p-4 border-b border-slate-800 flex items-center justify-between">
@@ -62,7 +70,7 @@ export default function ImagePage() {
           </div>
         </div>
         <span className="text-xs font-bold bg-slate-900 text-purple-400 px-2.5 py-1 rounded-lg border border-slate-800">
-          $0.05 USDm
+          $0.05 USDT
         </span>
       </div>
 
@@ -73,7 +81,7 @@ export default function ImagePage() {
             <span>High-Res 512×512 Image Generation</span>
           </div>
           <p className="text-slate-400">
-            Describe your image concept. Each creation costs $0.05 USDm via x402 on Celo.
+            Describe any scene or concept. Each image generation costs $0.05 USDT via x402 on BotChain.
           </p>
         </div>
 
