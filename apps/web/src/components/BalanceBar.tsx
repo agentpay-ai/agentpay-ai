@@ -8,8 +8,6 @@ interface BalanceBarProps {
   botBalance: string;
   usdtBalance?: string;
   bousdtBalance?: string;
-  usdmBalance: string;
-  usdcBalance: string;
   loading: boolean;
   onRefresh: () => void;
   onDisconnect?: () => void;
@@ -23,8 +21,6 @@ export function BalanceBar({
   botBalance,
   usdtBalance = "0.00",
   bousdtBalance = "0.00",
-  usdmBalance,
-  usdcBalance,
   loading,
   onRefresh,
   onDisconnect,
@@ -163,18 +159,6 @@ export function BalanceBar({
               </span>
             </div>
           )}
-
-          <div className="flex items-center space-x-1 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">
-            <span className="font-semibold text-amber-300 text-[11px]">
-              ${usdmBalance} USDm
-            </span>
-          </div>
-
-          <div className="flex items-center space-x-1 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">
-            <span className="font-semibold text-sky-400 text-[11px]">
-              ${usdcBalance} USDC
-            </span>
-          </div>
         </div>
 
         <button

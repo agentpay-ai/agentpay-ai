@@ -8,8 +8,14 @@ import { Bot, Send, Sparkles, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function ChatPage() {
-  const { address, disconnectWallet, switchOrAddBotChain } = useWallet();
-  const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
+  const { address, currentChainId, isTestnet, disconnectWallet, switchOrAddBotChain } = useWallet();
+  const {
+    botBalance,
+    usdtBalance,
+    bousdtBalance,
+    loading: balanceLoading,
+    refetch,
+  } = useBalance(address, currentChainId);
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -41,12 +47,14 @@ export default function ChatPage() {
       <BalanceBar
         address={address}
         botBalance={botBalance}
-        usdmBalance={usdmBalance}
-        usdcBalance={usdcBalance}
+        usdtBalance={usdtBalance}
+        bousdtBalance={bousdtBalance}
         loading={balanceLoading}
         onRefresh={refetch}
         onDisconnect={disconnectWallet}
-        onSwitchNetwork={() => switchOrAddBotChain(true)}
+        currentChainId={currentChainId}
+        isTestnet={isTestnet}
+        onSwitchNetwork={(targetTestnet) => switchOrAddBotChain(targetTestnet)}
       />
 
       <div className="p-4 border-b border-slate-800 flex items-center justify-between">
@@ -60,7 +68,7 @@ export default function ChatPage() {
           </div>
         </div>
         <span className="text-xs font-bold bg-slate-900 text-emerald-400 px-2.5 py-1 rounded-lg border border-slate-800">
-          $0.01 USDm
+          $0.01 USDT
         </span>
       </div>
 
@@ -71,7 +79,7 @@ export default function ChatPage() {
             <span>Google Gemini 2.5 Flash Powered</span>
           </div>
           <p className="text-slate-400">
-            Ask any question, generate text, summaries, or translations. Each prompt costs $0.01 USDm via x402 on Celo.
+            Ask any question, generate text, summaries, or translations. Each prompt costs $0.01 USDT via x402 on BotChain.
           </p>
         </div>
 

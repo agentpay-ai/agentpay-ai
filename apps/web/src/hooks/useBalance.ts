@@ -5,7 +5,6 @@ import { formatUnits } from "viem";
 import {
   publicClientBotChain,
   publicClientBotChainTestnet,
-  publicClientCelo,
 } from "@/lib/chains";
 import { TOKENS, ERC20_ABI } from "@/lib/tokens";
 
@@ -13,8 +12,6 @@ export function useBalance(address: string | null, chainId: number = 968) {
   const [botBalance, setBotBalance] = useState<string>("0.00");
   const [usdtBalance, setUsdtBalance] = useState<string>("0.00");
   const [bousdtBalance, setBousdtBalance] = useState<string>("0.00");
-  const [usdmBalance, setUsdmBalance] = useState<string>("0.00");
-  const [usdcBalance, setUsdcBalance] = useState<string>("0.00");
   const [loading, setLoading] = useState<boolean>(false);
 
   const fetchBalances = useCallback(async () => {
@@ -25,7 +22,7 @@ export function useBalance(address: string | null, chainId: number = 968) {
       const botClient = isMainnet ? publicClientBotChain : publicClientBotChainTestnet;
       const tokenConfig = isMainnet ? TOKENS.botChainMainnet : TOKENS.botChainTestnet;
 
-      const [botRaw, usdtRaw, bousdtRaw, usdmRaw, usdcRaw] = await Promise.all([
+      const [botRaw, usdtRaw, bousdtRaw] = await Promise.all([
         botClient.getBalance({ address: address as `0x${string}` }).catch(() => BigInt(0)),
         botClient
           .readContract({
@@ -45,29 +42,11 @@ export function useBalance(address: string | null, chainId: number = 968) {
               })
               .catch(() => BigInt(0))
           : Promise.resolve(BigInt(0)),
-        publicClientCelo
-          .readContract({
-            address: tokenConfig.USDm,
-            abi: ERC20_ABI,
-            functionName: "balanceOf",
-            args: [address as `0x${string}`],
-          })
-          .catch(() => BigInt(0)),
-        publicClientCelo
-          .readContract({
-            address: tokenConfig.USDC,
-            abi: ERC20_ABI,
-            functionName: "balanceOf",
-            args: [address as `0x${string}`],
-          })
-          .catch(() => BigInt(0)),
       ]);
 
       setBotBalance(Number(formatUnits(botRaw, 18)).toFixed(2));
       setUsdtBalance(Number(formatUnits(usdtRaw, 6)).toFixed(2));
       setBousdtBalance(Number(formatUnits(bousdtRaw, 6)).toFixed(2));
-      setUsdmBalance(Number(formatUnits(usdmRaw, 18)).toFixed(2));
-      setUsdcBalance(Number(formatUnits(usdcRaw, 6)).toFixed(2));
     } catch (err) {
       console.error("Error reading balances:", err);
     } finally {
@@ -95,8 +74,6 @@ export function useBalance(address: string | null, chainId: number = 968) {
     botBalance,
     usdtBalance,
     bousdtBalance,
-    usdmBalance,
-    usdcBalance,
     loading,
     refetch: fetchBalances,
   };
