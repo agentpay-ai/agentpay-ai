@@ -10,7 +10,16 @@ import { FeedbackModal } from "@/components/FeedbackModal";
 import { Bot, Image as ImageIcon, Code, Sparkles, Smartphone, CheckCircle, Star, Cpu } from "lucide-react";
 
 export default function Home() {
-  const { address, inMiniPay, connecting, connectWallet, disconnectWallet, switchOrAddBotChain } = useWallet();
+  const {
+    address,
+    inMiniPay,
+    connecting,
+    currentChainId,
+    isTestnet,
+    connectWallet,
+    disconnectWallet,
+    switchOrAddBotChain,
+  } = useWallet();
   const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
@@ -28,7 +37,9 @@ export default function Home() {
         loading={balanceLoading}
         onRefresh={refetch}
         onDisconnect={disconnectWallet}
-        onSwitchNetwork={() => switchOrAddBotChain(true)}
+        currentChainId={currentChainId}
+        isTestnet={isTestnet}
+        onSwitchNetwork={(targetTestnet) => switchOrAddBotChain(targetTestnet)}
       />
 
       <div className="flex-1 p-5 space-y-5">

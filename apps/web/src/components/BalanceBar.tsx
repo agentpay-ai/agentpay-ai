@@ -1,6 +1,7 @@
 "use client";
 
-import { Wallet, Coins, RefreshCw, Cpu, LogOut } from "lucide-react";
+import { useState } from "react";
+import { Wallet, Coins, RefreshCw, Cpu, LogOut, ChevronDown } from "lucide-react";
 
 interface BalanceBarProps {
   address: string | null;
@@ -10,7 +11,9 @@ interface BalanceBarProps {
   loading: boolean;
   onRefresh: () => void;
   onDisconnect?: () => void;
-  onSwitchNetwork?: () => void;
+  currentChainId?: number;
+  isTestnet?: boolean;
+  onSwitchNetwork?: (isTestnet: boolean) => void;
 }
 
 export function BalanceBar({
@@ -21,14 +24,16 @@ export function BalanceBar({
   loading,
   onRefresh,
   onDisconnect,
+  isTestnet = true,
   onSwitchNetwork,
 }: BalanceBarProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const truncatedAddress = address
     ? `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
     : null;
 
   return (
-    <div className="w-full bg-slate-900 border-b border-slate-800 px-4 py-3 text-white flex flex-col space-y-2 text-sm">
+    <div className="w-full bg-slate-900 border-b border-slate-800 px-4 py-3 text-white flex flex-col space-y-2 text-sm relative">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Wallet className="w-4 h-4 text-amber-400" />
@@ -46,14 +51,65 @@ export function BalanceBar({
           )}
         </div>
 
-        <button
-          onClick={onSwitchNetwork}
-          className="flex items-center space-x-1.5 bg-purple-950/60 hover:bg-purple-900/80 px-2.5 py-0.5 rounded-full border border-purple-800/50 text-[11px] font-semibold text-purple-300 transition cursor-pointer"
-          title="Click to Switch / Add BotChain Network"
-        >
-          <Cpu className="w-3 h-3 text-purple-400" />
-          <span>BotChain EVM</span>
-        </button>
+        {/* Network Switcher Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="flex items-center space-x-1.5 bg-purple-950/70 hover:bg-purple-900 px-2.5 py-1 rounded-full border border-purple-700/50 text-[11px] font-semibold text-purple-200 transition cursor-pointer shadow-sm"
+            title="Switch BotChain Network (Testnet / Mainnet)"
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isTestnet ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
+              }`}
+            />
+            <Cpu className="w-3 h-3 text-purple-300" />
+            <span>{isTestnet ? "BotChain Testnet (968)" : "BotChain Mainnet (677)"}</span>
+            <ChevronDown className="w-3 h-3 text-purple-400" />
+          </button>
+
+          {menuOpen && (
+            <div className="absolute right-0 mt-1.5 w-52 bg-slate-900 border border-purple-800/60 rounded-xl shadow-xl z-50 p-1 space-y-1">
+              <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-slate-800">
+                Select Network
+              </div>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  onSwitchNetwork?.(true);
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 text-xs rounded-lg transition ${
+                  isTestnet
+                    ? "bg-purple-900/60 text-purple-200 font-semibold"
+                    : "text-slate-300 hover:bg-slate-800"
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>BotChain Testnet</span>
+                </div>
+                <span className="text-[10px] font-mono text-slate-400">968</span>
+              </button>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  onSwitchNetwork?.(false);
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 text-xs rounded-lg transition ${
+                  !isTestnet
+                    ? "bg-purple-900/60 text-purple-200 font-semibold"
+                    : "text-slate-300 hover:bg-slate-800"
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>BotChain Mainnet</span>
+                </div>
+                <span className="text-[10px] font-mono text-slate-400">677</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center justify-between pt-1 border-t border-slate-800/60">
