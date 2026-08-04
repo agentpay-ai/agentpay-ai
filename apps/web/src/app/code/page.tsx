@@ -8,7 +8,7 @@ import { Code, Sparkles, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 export default function CodePage() {
-  const { address } = useWallet();
+  const { address, disconnectWallet, switchOrAddBotChain } = useWallet();
   const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
   const [codeSnippet, setCodeSnippet] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,6 +47,8 @@ export default function CodePage() {
         usdcBalance={usdcBalance}
         loading={balanceLoading}
         onRefresh={refetch}
+        onDisconnect={disconnectWallet}
+        onSwitchNetwork={() => switchOrAddBotChain(true)}
       />
 
       <div className="p-4 border-b border-slate-800 flex items-center justify-between">

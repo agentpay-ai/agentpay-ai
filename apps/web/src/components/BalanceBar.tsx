@@ -1,6 +1,6 @@
 "use client";
 
-import { Wallet, Coins, RefreshCw, Cpu } from "lucide-react";
+import { Wallet, Coins, RefreshCw, Cpu, LogOut } from "lucide-react";
 
 interface BalanceBarProps {
   address: string | null;
@@ -9,6 +9,8 @@ interface BalanceBarProps {
   usdcBalance: string;
   loading: boolean;
   onRefresh: () => void;
+  onDisconnect?: () => void;
+  onSwitchNetwork?: () => void;
 }
 
 export function BalanceBar({
@@ -18,6 +20,8 @@ export function BalanceBar({
   usdcBalance,
   loading,
   onRefresh,
+  onDisconnect,
+  onSwitchNetwork,
 }: BalanceBarProps) {
   const truncatedAddress = address
     ? `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
@@ -31,12 +35,25 @@ export function BalanceBar({
           <span className="font-mono text-slate-300 text-xs">
             {truncatedAddress || "Not Connected"}
           </span>
+          {address && onDisconnect && (
+            <button
+              onClick={onDisconnect}
+              className="text-slate-500 hover:text-red-400 transition p-1 rounded hover:bg-slate-800"
+              title="Disconnect Wallet"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
-        <div className="flex items-center space-x-1.5 bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-800/50 text-[11px] font-semibold text-purple-300">
+        <button
+          onClick={onSwitchNetwork}
+          className="flex items-center space-x-1.5 bg-purple-950/60 hover:bg-purple-900/80 px-2.5 py-0.5 rounded-full border border-purple-800/50 text-[11px] font-semibold text-purple-300 transition cursor-pointer"
+          title="Click to Switch / Add BotChain Network"
+        >
           <Cpu className="w-3 h-3 text-purple-400" />
           <span>BotChain EVM</span>
-        </div>
+        </button>
       </div>
 
       <div className="flex items-center justify-between pt-1 border-t border-slate-800/60">
