@@ -9,7 +9,7 @@ import Link from "next/link";
 
 export default function ImagePage() {
   const { address } = useWallet();
-  const { usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
+  const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -17,6 +17,7 @@ export default function ImagePage() {
   async function handleGenerate() {
     if (!prompt.trim() || loading) return;
     setLoading(true);
+    setImageUrl(null);
 
     try {
       const res = await fetch("http://localhost:3001/api/image", {
@@ -28,10 +29,10 @@ export default function ImagePage() {
       if (data.imageUrl) {
         setImageUrl(data.imageUrl);
       } else {
-        setImageUrl("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=512&auto=format&fit=crop");
+        setImageUrl("https://placehold.co/512x512/0f172a/f59e0b.png?text=AI+Generated+Image");
       }
     } catch {
-      setImageUrl("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=512&auto=format&fit=crop");
+      setImageUrl("https://placehold.co/512x512/0f172a/f59e0b.png?text=AI+Generated+Image");
     } finally {
       setLoading(false);
     }
@@ -41,6 +42,7 @@ export default function ImagePage() {
     <main className="flex flex-col min-h-screen max-w-md mx-auto bg-slate-950 text-slate-100 shadow-2xl border-x border-slate-800">
       <BalanceBar
         address={address}
+        botBalance={botBalance}
         usdmBalance={usdmBalance}
         usdcBalance={usdcBalance}
         loading={balanceLoading}

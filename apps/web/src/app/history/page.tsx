@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default function HistoryPage() {
   const { address } = useWallet();
-  const { usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
+  const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
 
   const mockHistory = [
     {
@@ -17,7 +17,7 @@ export default function HistoryPage() {
       amount: "$0.01 USDm",
       timestamp: "2 mins ago",
       txHash: "0x3f7a1b...89c2",
-      status: "Settled (x402)",
+      status: "Settled (BotChain)",
     },
     {
       id: "2",
@@ -25,7 +25,7 @@ export default function HistoryPage() {
       amount: "$0.05 USDm",
       timestamp: "15 mins ago",
       txHash: "0x9e2c4d...11a4",
-      status: "Settled (x402)",
+      status: "Settled (BotChain)",
     },
     {
       id: "3",
@@ -33,7 +33,7 @@ export default function HistoryPage() {
       amount: "$0.02 USDm",
       timestamp: "1 hour ago",
       txHash: "0x6a8f0b...55d9",
-      status: "Settled (x402)",
+      status: "Settled (BotChain)",
     },
   ];
 
@@ -41,6 +41,7 @@ export default function HistoryPage() {
     <main className="flex flex-col min-h-screen max-w-md mx-auto bg-slate-950 text-slate-100 shadow-2xl border-x border-slate-800">
       <BalanceBar
         address={address}
+        botBalance={botBalance}
         usdmBalance={usdmBalance}
         usdcBalance={usdcBalance}
         loading={balanceLoading}
@@ -57,8 +58,8 @@ export default function HistoryPage() {
             <h1 className="font-bold text-white text-base">Payment History</h1>
           </div>
         </div>
-        <span className="text-xs font-semibold text-slate-400">
-          Celo Proof of Ship
+        <span className="text-xs font-semibold text-purple-400 bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-800/50">
+          BotChain Agent Network
         </span>
       </div>
 
@@ -69,7 +70,7 @@ export default function HistoryPage() {
             <span>Onchain ERC-8021 Attribution Tracked</span>
           </div>
           <p className="text-slate-400">
-            All micropayments are settled via x402 on Celo Mainnet and recorded on the Proof of Ship Season 2 leaderboard.
+            All micropayments are settled via x402 on BotChain EVM and recorded onchain via AgentPayRegistry.
           </p>
         </div>
 
@@ -86,7 +87,7 @@ export default function HistoryPage() {
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
                   <h3 className="font-semibold text-white text-xs">{item.tool}</h3>
-                  <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded flex items-center space-x-1">
+                  <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-1.5 py-0.5 rounded flex items-center space-x-1">
                     <CheckCircle2 className="w-3 h-3" />
                     <span>{item.status}</span>
                   </span>
@@ -95,7 +96,7 @@ export default function HistoryPage() {
                   <span>{item.timestamp}</span>
                   <span>•</span>
                   <a
-                    href="https://celoscan.io"
+                    href="https://scan.bohr.life"
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center space-x-1 text-amber-400 hover:text-amber-300 font-mono"

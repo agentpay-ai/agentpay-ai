@@ -7,11 +7,11 @@ import { useBalance } from "@/hooks/useBalance";
 import { BalanceBar } from "@/components/BalanceBar";
 import { AgentIdentityBadge } from "@/components/AgentIdentityBadge";
 import { FeedbackModal } from "@/components/FeedbackModal";
-import { Bot, Image as ImageIcon, Code, Sparkles, Smartphone, CheckCircle, Star } from "lucide-react";
+import { Bot, Image as ImageIcon, Code, Sparkles, Smartphone, CheckCircle, Star, Cpu } from "lucide-react";
 
 export default function Home() {
   const { address, inMiniPay, connecting, connectWallet } = useWallet();
-  const { usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
+  const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   function handleFeedbackSubmit(score: number, notes: string) {
@@ -22,6 +22,7 @@ export default function Home() {
     <main className="flex flex-col min-h-screen max-w-md mx-auto bg-slate-950 text-slate-100 shadow-2xl border-x border-slate-800">
       <BalanceBar
         address={address}
+        botBalance={botBalance}
         usdmBalance={usdmBalance}
         usdcBalance={usdcBalance}
         loading={balanceLoading}
@@ -30,35 +31,39 @@ export default function Home() {
 
       <div className="flex-1 p-5 space-y-5">
         {/* Banner */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40 p-5 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-purple-950/40 p-5 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="inline-flex items-center space-x-1.5 bg-amber-400/10 text-amber-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-amber-400/20">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Google Gemini Flash Powered</span>
             </span>
+            <span className="inline-flex items-center space-x-1 bg-purple-400/10 text-purple-400 text-xs font-medium px-2 py-0.5 rounded-full border border-purple-400/20">
+              <Cpu className="w-3 h-3" />
+              <span>BotChain Active</span>
+            </span>
             {inMiniPay && (
               <span className="inline-flex items-center space-x-1 bg-emerald-400/10 text-emerald-400 text-xs font-medium px-2 py-0.5 rounded-full border border-emerald-400/20">
                 <CheckCircle className="w-3 h-3" />
-                <span>MiniPay Active</span>
+                <span>MiniPay</span>
               </span>
             )}
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-white">
-            Pay-Per-Prompt AI
+            BotChain Autonomous AI
           </h1>
           <p className="text-slate-400 text-sm leading-relaxed">
-            Instant mobile access to AI text, images, and code review using sub-cent stablecoin payments. No subscriptions.
+            Pay-per-prompt AI access hub on BotChain EVM for text completions, image generation, and code security audits. Sub-cent micro-transactions with zero subscriptions.
           </p>
 
-          {!inMiniPay && !address && (
+          {!address && (
             <button
               onClick={connectWallet}
               disabled={connecting}
-              className="w-full mt-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-semibold py-2.5 rounded-xl transition flex items-center justify-center space-x-2 text-sm"
+              className="w-full mt-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center space-x-2 text-sm shadow-lg shadow-purple-500/20"
             >
               <Smartphone className="w-4 h-4" />
-              <span>{connecting ? "Connecting..." : "Connect Celo Wallet"}</span>
+              <span>{connecting ? "Connecting..." : "Connect Wallet"}</span>
             </button>
           )}
         </div>
@@ -149,7 +154,7 @@ export default function Home() {
       />
 
       <footer className="p-4 text-center text-xs text-slate-500 border-t border-slate-900">
-        AgentPay AI • Powered by Celo MiniPay, x402 & ERC-8004
+        AgentPay AI • Powered by BotChain Autonomous Agent Network, x402 & ERC-8004
       </footer>
     </main>
   );
