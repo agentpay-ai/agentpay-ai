@@ -144,12 +144,20 @@ export function useWallet() {
     [primaryWallet]
   );
 
+  const chainIdRaw = primaryWallet?.chainId ? String(primaryWallet.chainId).replace("eip155:", "") : "968";
+  const currentChainId = parseInt(chainIdRaw, 10) || 968;
+  const isTestnet = currentChainId === 968;
+  const currentChainName = currentChainId === 677 ? "BotChain Mainnet" : currentChainId === 968 ? "BotChain Testnet" : `Chain ${currentChainId}`;
+
   return {
     address,
     authenticated,
     ready,
     user,
     wallets,
+    currentChainId,
+    isTestnet,
+    currentChainName,
     inMiniPay: isMiniPay(),
     hasEVMWallet: hasEVMWallet(),
     connecting: !ready,
