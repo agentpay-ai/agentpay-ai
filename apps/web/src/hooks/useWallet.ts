@@ -59,16 +59,62 @@ export function useWallet() {
   const switchOrAddBotChain = useCallback(
     async (isTestnet = true) => {
       const chainIdHex = isTestnet ? "0x3c8" : "0x2a5"; // 968 decimal / 677 decimal
+      const chainIdDec = isTestnet ? 968 : 677;
 
+      const chainParams = isTestnet
+        ? {
+            chainId: "0x3c8",
+            chainName: "BOT Chain Testnet",
+            nativeCurrency: { name: "tBOT", symbol: "tBOT", decimals: 18 },
+            rpcUrls: ["https://rpc.bohr.life"],
+            blockExplorerUrls: ["https://scan.bohr.life"],
+          }
+        : {
+            chainId: "0x2a5",
+            chainName: "BOT Chain",
+            nativeCurrency: { name: "BOT", symbol: "BOT", decimals: 18 },
+            rpcUrls: ["https://rpc.botchain.ai"],
+            blockExplorerUrls: ["https://scan.botchain.ai"],
+          };
+
+      // 1. Try Privy primaryWallet switchChain
       if (primaryWallet) {
         try {
-          await primaryWallet.switchChain(isTestnet ? 968 : 677);
+          await primaryWallet.switchChain(chainIdDec);
           return;
         } catch {
-          // Fall back to direct provider request if switchChain fails
+          // If switchChain fails (e.g. chain not added in wallet), get primaryWallet's provider
+          try {
+            const provider = (await primaryWallet.getEthereumProvider()) as EthereumProvider;
+            if (provider?.request) {
+              try {
+                await provider.request({
+                  method: "wallet_switchEthereumChain",
+                  params: [{ chainId: chainIdHex }],
+                });
+                return;
+              } catch (switchErr: unknown) {
+                const err = switchErr as { code?: number; message?: string };
+                if (
+                  err.code === 4902 ||
+                  err.message?.includes("Unrecognized chain") ||
+                  err.message?.includes("Could not find chain")
+                ) {
+                  await provider.request({
+                    method: "wallet_addEthereumChain",
+                    params: [chainParams],
+                  });
+                  return;
+                }
+              }
+            }
+          } catch (providerErr) {
+            console.error("Provider switch error:", providerErr);
+          }
         }
       }
 
+      // 2. Direct fallback to window.ethereum
       const eth = getEthereum();
       if (eth?.request) {
         try {
@@ -78,23 +124,11 @@ export function useWallet() {
           });
         } catch (switchError: unknown) {
           const err = switchError as { code?: number; message?: string };
-          if (err.code === 4902 || err.message?.includes("Unrecognized chain")) {
-            const chainParams = isTestnet
-              ? {
-                  chainId: "0x3c8",
-                  chainName: "BOT Chain Testnet",
-                  nativeCurrency: { name: "tBOT", symbol: "tBOT", decimals: 18 },
-                  rpcUrls: ["https://rpc.bohr.life"],
-                  blockExplorerUrls: ["https://scan.bohr.life"],
-                }
-              : {
-                  chainId: "0x2a5",
-                  chainName: "BOT Chain",
-                  nativeCurrency: { name: "BOT", symbol: "BOT", decimals: 18 },
-                  rpcUrls: ["https://rpc.botchain.ai"],
-                  blockExplorerUrls: ["https://scan.botchain.ai"],
-                };
-
+          if (
+            err.code === 4902 ||
+            err.message?.includes("Unrecognized chain") ||
+            err.message?.includes("Could not find chain")
+          ) {
             try {
               await eth.request({
                 method: "wallet_addEthereumChain",
