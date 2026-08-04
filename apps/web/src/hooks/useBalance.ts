@@ -2,11 +2,17 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { formatUnits } from "viem";
-import { publicClientBotChainTestnet, publicClientCelo } from "@/lib/chains";
+import {
+  publicClientBotChain,
+  publicClientBotChainTestnet,
+  publicClientCelo,
+} from "@/lib/chains";
 import { TOKENS, ERC20_ABI } from "@/lib/tokens";
 
-export function useBalance(address: string | null) {
+export function useBalance(address: string | null, chainId: number = 968) {
   const [botBalance, setBotBalance] = useState<string>("0.00");
+  const [usdtBalance, setUsdtBalance] = useState<string>("0.00");
+  const [bousdtBalance, setBousdtBalance] = useState<string>("0.00");
   const [usdmBalance, setUsdmBalance] = useState<string>("0.00");
   const [usdcBalance, setUsdcBalance] = useState<string>("0.00");
   const [loading, setLoading] = useState<boolean>(false);
@@ -15,23 +21,51 @@ export function useBalance(address: string | null) {
     if (!address) return;
     setLoading(true);
     try {
-      const [botRaw, usdmRaw, usdcRaw] = await Promise.all([
-        publicClientBotChainTestnet.getBalance({ address: address as `0x${string}` }).catch(() => BigInt(0)),
-        publicClientCelo.readContract({
-          address: TOKENS.mainnet.USDm,
-          abi: ERC20_ABI,
-          functionName: "balanceOf",
-          args: [address as `0x${string}`],
-        }).catch(() => BigInt(0)),
-        publicClientCelo.readContract({
-          address: TOKENS.mainnet.USDC,
-          abi: ERC20_ABI,
-          functionName: "balanceOf",
-          args: [address as `0x${string}`],
-        }).catch(() => BigInt(0)),
+      const isMainnet = chainId === 677;
+      const botClient = isMainnet ? publicClientBotChain : publicClientBotChainTestnet;
+      const tokenConfig = isMainnet ? TOKENS.botChainMainnet : TOKENS.botChainTestnet;
+
+      const [botRaw, usdtRaw, bousdtRaw, usdmRaw, usdcRaw] = await Promise.all([
+        botClient.getBalance({ address: address as `0x${string}` }).catch(() => BigInt(0)),
+        botClient
+          .readContract({
+            address: tokenConfig.USDT,
+            abi: ERC20_ABI,
+            functionName: "balanceOf",
+            args: [address as `0x${string}`],
+          })
+          .catch(() => BigInt(0)),
+        isMainnet && TOKENS.botChainMainnet.BOUSDT
+          ? botClient
+              .readContract({
+                address: TOKENS.botChainMainnet.BOUSDT,
+                abi: ERC20_ABI,
+                functionName: "balanceOf",
+                args: [address as `0x${string}`],
+              })
+              .catch(() => BigInt(0))
+          : Promise.resolve(BigInt(0)),
+        publicClientCelo
+          .readContract({
+            address: tokenConfig.USDm,
+            abi: ERC20_ABI,
+            functionName: "balanceOf",
+            args: [address as `0x${string}`],
+          })
+          .catch(() => BigInt(0)),
+        publicClientCelo
+          .readContract({
+            address: tokenConfig.USDC,
+            abi: ERC20_ABI,
+            functionName: "balanceOf",
+            args: [address as `0x${string}`],
+          })
+          .catch(() => BigInt(0)),
       ]);
 
       setBotBalance(Number(formatUnits(botRaw, 18)).toFixed(2));
+      setUsdtBalance(Number(formatUnits(usdtRaw, 6)).toFixed(2));
+      setBousdtBalance(Number(formatUnits(bousdtRaw, 6)).toFixed(2));
       setUsdmBalance(Number(formatUnits(usdmRaw, 18)).toFixed(2));
       setUsdcBalance(Number(formatUnits(usdcRaw, 6)).toFixed(2));
     } catch (err) {
@@ -39,7 +73,7 @@ export function useBalance(address: string | null) {
     } finally {
       setLoading(false);
     }
-  }, [address]);
+  }, [address, chainId]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -59,6 +93,8 @@ export function useBalance(address: string | null) {
 
   return {
     botBalance,
+    usdtBalance,
+    bousdtBalance,
     usdmBalance,
     usdcBalance,
     loading,

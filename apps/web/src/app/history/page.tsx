@@ -8,7 +8,15 @@ import Link from "next/link";
 
 export default function HistoryPage() {
   const { address, currentChainId, isTestnet, disconnectWallet, switchOrAddBotChain } = useWallet();
-  const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
+  const {
+    botBalance,
+    usdtBalance,
+    bousdtBalance,
+    usdmBalance,
+    usdcBalance,
+    loading: balanceLoading,
+    refetch,
+  } = useBalance(address, currentChainId);
 
   const mockHistory = [
     {
@@ -42,6 +50,8 @@ export default function HistoryPage() {
       <BalanceBar
         address={address}
         botBalance={botBalance}
+        usdtBalance={usdtBalance}
+        bousdtBalance={bousdtBalance}
         usdmBalance={usdmBalance}
         usdcBalance={usdcBalance}
         loading={balanceLoading}

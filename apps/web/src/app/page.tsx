@@ -20,7 +20,15 @@ export default function Home() {
     disconnectWallet,
     switchOrAddBotChain,
   } = useWallet();
-  const { botBalance, usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
+  const {
+    botBalance,
+    usdtBalance,
+    bousdtBalance,
+    usdmBalance,
+    usdcBalance,
+    loading: balanceLoading,
+    refetch,
+  } = useBalance(address, currentChainId);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   function handleFeedbackSubmit(score: number, notes: string) {
@@ -32,6 +40,8 @@ export default function Home() {
       <BalanceBar
         address={address}
         botBalance={botBalance}
+        usdtBalance={usdtBalance}
+        bousdtBalance={bousdtBalance}
         usdmBalance={usdmBalance}
         usdcBalance={usdcBalance}
         loading={balanceLoading}
