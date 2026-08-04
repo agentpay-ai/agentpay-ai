@@ -6,6 +6,8 @@ import { Wallet, Coins, RefreshCw, Cpu, LogOut, ChevronDown, Copy, Check } from 
 interface BalanceBarProps {
   address: string | null;
   botBalance: string;
+  usdtBalance?: string;
+  bousdtBalance?: string;
   usdmBalance: string;
   usdcBalance: string;
   loading: boolean;
@@ -19,6 +21,8 @@ interface BalanceBarProps {
 export function BalanceBar({
   address,
   botBalance,
+  usdtBalance = "0.00",
+  bousdtBalance = "0.00",
   usdmBalance,
   usdcBalance,
   loading,
@@ -137,23 +141,37 @@ export function BalanceBar({
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-1 border-t border-slate-800/60">
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center space-x-1 bg-purple-900/40 px-2.5 py-1 rounded-full border border-purple-700/50">
-            <Coins className="w-3.5 h-3.5 text-purple-400" />
-            <span className="font-semibold text-purple-300 text-xs">
+      <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 overflow-x-auto no-scrollbar">
+        <div className="flex items-center space-x-1.5 shrink-0">
+          <div className="flex items-center space-x-1 bg-purple-900/40 px-2 py-0.5 rounded-full border border-purple-700/50">
+            <Coins className="w-3 h-3 text-purple-400" />
+            <span className="font-semibold text-purple-300 text-[11px]">
               {botBalance} BOT
             </span>
           </div>
 
-          <div className="flex items-center space-x-1 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">
-            <span className="font-semibold text-emerald-400 text-xs">
+          <div className="flex items-center space-x-1 bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-800/60">
+            <span className="font-semibold text-emerald-300 text-[11px]">
+              ${usdtBalance} USDT
+            </span>
+          </div>
+
+          {!isTestnet && (
+            <div className="flex items-center space-x-1 bg-teal-950/50 px-2 py-0.5 rounded-full border border-teal-800/60">
+              <span className="font-semibold text-teal-300 text-[11px]">
+                ${bousdtBalance} BOUSDT
+              </span>
+            </div>
+          )}
+
+          <div className="flex items-center space-x-1 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">
+            <span className="font-semibold text-amber-300 text-[11px]">
               ${usdmBalance} USDm
             </span>
           </div>
 
-          <div className="flex items-center space-x-1 bg-slate-800 px-2 py-1 rounded-full border border-slate-700">
-            <span className="font-semibold text-sky-400 text-xs">
+          <div className="flex items-center space-x-1 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">
+            <span className="font-semibold text-sky-400 text-[11px]">
               ${usdcBalance} USDC
             </span>
           </div>
@@ -162,7 +180,7 @@ export function BalanceBar({
         <button
           onClick={onRefresh}
           disabled={loading}
-          className="text-slate-400 hover:text-white transition disabled:opacity-50 p-1"
+          className="text-slate-400 hover:text-white transition disabled:opacity-50 p-1 shrink-0 ml-2"
           title="Refresh balances"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
