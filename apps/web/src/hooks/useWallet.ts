@@ -26,15 +26,25 @@ export function useWallet() {
   const { wallets } = useWallets();
 
   const primaryWallet = wallets[0];
-  const address = primaryWallet?.address || user?.wallet?.address || null;
+  // Only expose wallet address when Privy session is authenticated
+  const address = authenticated ? (primaryWallet?.address || user?.wallet?.address || null) : null;
 
   const disconnectWallet = useCallback(async () => {
     try {
-      await logout();
+      // Disconnect active connected wallets from Privy state
+      for (const wallet of wallets) {
+        if (typeof wallet.disconnect === "function") {
+          await wallet.disconnect();
+        }
+      }
+      // Logout from Privy session if authenticated
+      if (authenticated) {
+        await logout();
+      }
     } catch (err) {
-      console.error("Privy logout error:", err);
+      console.error("Wallet disconnect error:", err);
     }
-  }, [logout]);
+  }, [authenticated, logout, wallets]);
 
   const connectWallet = useCallback(async (): Promise<string | null> => {
     try {
