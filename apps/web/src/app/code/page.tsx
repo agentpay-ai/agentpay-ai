@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useMiniPay } from "@/hooks/useMiniPay";
+import { useWallet } from "@/hooks/useWallet";
 import { useBalance } from "@/hooks/useBalance";
 import { BalanceBar } from "@/components/BalanceBar";
 import { Code, Sparkles, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 export default function CodePage() {
-  const { address } = useMiniPay();
+  const { address } = useWallet();
   const { usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
   const [codeSnippet, setCodeSnippet] = useState("");
   const [loading, setLoading] = useState(false);

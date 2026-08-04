@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useMiniPay } from "@/hooks/useMiniPay";
+import { useWallet } from "@/hooks/useWallet";
 import { useBalance } from "@/hooks/useBalance";
 import { BalanceBar } from "@/components/BalanceBar";
 import { AgentIdentityBadge } from "@/components/AgentIdentityBadge";
@@ -10,7 +10,7 @@ import { FeedbackModal } from "@/components/FeedbackModal";
 import { Bot, Image as ImageIcon, Code, Sparkles, Smartphone, CheckCircle, Star } from "lucide-react";
 
 export default function Home() {
-  const { address, inMiniPay, connecting, connectWallet } = useMiniPay();
+  const { address, inMiniPay, connecting, connectWallet } = useWallet();
   const { usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
