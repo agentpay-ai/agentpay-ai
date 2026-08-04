@@ -1,13 +1,13 @@
 "use client";
 
-import { useMiniPay } from "@/hooks/useMiniPay";
+import { useWallet } from "@/hooks/useWallet";
 import { useBalance } from "@/hooks/useBalance";
 import { BalanceBar } from "@/components/BalanceBar";
 import { History, ExternalLink, ShieldCheck, CheckCircle2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function HistoryPage() {
-  const { address } = useMiniPay();
+  const { address } = useWallet();
   const { usdmBalance, usdcBalance, loading: balanceLoading, refetch } = useBalance(address);
 
   const mockHistory = [

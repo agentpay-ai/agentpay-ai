@@ -3,11 +3,13 @@
 import { ReactNode, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createConfig, http, WagmiProvider } from "wagmi";
-import { celo, celoSepolia } from "wagmi/chains";
+import { botChain, botChainTestnet, celo, celoSepolia } from "@/lib/chains";
 
 const wagmiConfig = createConfig({
-  chains: [celo, celoSepolia],
+  chains: [botChainTestnet, botChain, celo, celoSepolia],
   transports: {
+    [botChainTestnet.id]: http("https://rpc.bohr.life"),
+    [botChain.id]: http("https://rpc.botchain.ai"),
     [celo.id]: http("https://forno.celo.org"),
     [celoSepolia.id]: http("https://forno.celo-sepolia.celo-testnet.org"),
   },

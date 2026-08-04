@@ -1,6 +1,6 @@
 "use client";
 
-import { ShieldCheck, Star, ExternalLink } from "lucide-react";
+import { ShieldCheck, Star } from "lucide-react";
 
 interface AgentIdentityBadgeProps {
   reputationScore?: number;
@@ -25,7 +25,7 @@ export function AgentIdentityBadge({
             </span>
           </div>
           <p className="text-slate-400 text-[11px]">
-            Onchain Identity & Trust Protocol on Celo
+            Onchain Identity & Trust Protocol on BotChain EVM
           </p>
         </div>
       </div>
