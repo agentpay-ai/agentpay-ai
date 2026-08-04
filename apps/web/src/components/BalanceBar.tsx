@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Wallet, Coins, RefreshCw, Cpu, LogOut, ChevronDown } from "lucide-react";
+import { Wallet, Coins, RefreshCw, Cpu, LogOut, ChevronDown, Copy, Check } from "lucide-react";
 
 interface BalanceBarProps {
   address: string | null;
@@ -28,18 +28,43 @@ export function BalanceBar({
   onSwitchNetwork,
 }: BalanceBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const truncatedAddress = address
     ? `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
     : null;
 
+  async function handleCopyAddress() {
+    if (!address) return;
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy address:", err);
+    }
+  }
+
   return (
     <div className="w-full bg-slate-900 border-b border-slate-800 px-4 py-3 text-white flex flex-col space-y-2 text-sm relative">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5">
           <Wallet className="w-4 h-4 text-amber-400" />
           <span className="font-mono text-slate-300 text-xs">
             {truncatedAddress || "Not Connected"}
           </span>
+          {address && (
+            <button
+              onClick={handleCopyAddress}
+              className="text-slate-400 hover:text-purple-300 transition p-1 rounded hover:bg-slate-800"
+              title={copied ? "Copied!" : "Copy Wallet Address"}
+            >
+              {copied ? (
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+            </button>
+          )}
           {address && onDisconnect && (
             <button
               onClick={onDisconnect}
