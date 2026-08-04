@@ -17,7 +17,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           theme: "dark",
           accentColor: "#8b5cf6",
           logo: "https://agentpay-ai.vercel.app/icon.png",
+          walletChainType: "ethereum-only",
         },
+        loginMethods: ["wallet", "email"],
         supportedChains: [botChainTestnet, botChain, celo, celoSepolia],
         defaultChain: botChainTestnet,
         embeddedWallets: {
