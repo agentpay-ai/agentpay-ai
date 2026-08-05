@@ -27,8 +27,8 @@ AgentPayAI is constructed as a monorepo containing three core packages: `apps/we
                        |                                |
                        v                                v
           +---------------------------------------------------+
-          |       Multi-Chain Smart Contracts Registry        |
-          |       (AgentPayRegistry.sol on Celo & BotChain)   |
+          |     UUPS Upgradeable Smart Contract Vault         |
+          |  (ERC1967Proxy AgentPayRegistry.sol on BotChain)  |
           +---------------------------------------------------+
 ```
 

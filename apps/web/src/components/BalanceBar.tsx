@@ -159,6 +159,11 @@ export function BalanceBar({
               </span>
             </div>
           )}
+
+          <div className="flex items-center space-x-1 bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-700/50 text-[10px] text-amber-300 font-mono" title="x402 Micropayments settle directly into the UUPS Upgradeable AgentPayRegistry Proxy Contract Vault">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span>Vault: AgentPayRegistry</span>
+          </div>
         </div>
 
         <button

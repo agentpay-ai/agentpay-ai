@@ -41,10 +41,10 @@
 - [x] Mobile UI complete for Chat, Image, Code & History tools
 
 ### 📅 Week 2 — BotChain Smart Contracts & Multi-Chain Layer (Phases 7, 7.5 & 8)
-- [ ] `AgentPayRegistry.sol` developed & unit tested (100% Foundry coverage)
-- [ ] `AgentPayRegistry.sol` deployed to BotChain EVM & Celo Sepolia
-- [ ] Multi-chain provider abstraction (`apps/web/src/lib/chains.ts`) prioritizing BotChain
-- [ ] BotChain Agent Relay gateway (`/api/botchain/relay`) unit tested
+- [x] UUPS Upgradeable `AgentPayRegistry.sol` developed & unit tested (100% Foundry coverage, 8/8 tests pass)
+- [x] `DeployBotChainRegistry.s.sol` script created & simulated on BotChain Testnet (`968`)
+- [x] `PAYMENT_RECIPIENT_ADDRESS` configured to UUPS ERC1967 Proxy Vault Contract (`0x5E07d482079f3ea4d1e5583a22db8f7ab415246B`)
+- [x] BotChain Agent Relay gateway (`/api/botchain/relay`) developed & tested (20/20 API tests pass)
 - [ ] End-to-end payment test on BotChain & MiniPay
 - [ ] PageSpeed score 90+
 

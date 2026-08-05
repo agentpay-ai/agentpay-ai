@@ -31,9 +31,12 @@ const usdtAddress = isMainnet
   ? "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C" // Mainnet USDT
   : "0x75edC9335175Fc0552D51D48439F229c10420fe3"; // Testnet USDT
 
+// Deployed AgentPayRegistry UUPS ERC1967 Proxy Vault Contract
+const defaultProxyVaultAddress = "0x5E07d482079f3ea4d1e5583a22db8f7ab415246B";
+
 const payToAddress =
   (process.env.PAYMENT_RECIPIENT_ADDRESS as `0x${string}`) ||
-  "0x199A6E94191d4e0ebB7DE602C5E78a83F204E6C3";
+  defaultProxyVaultAddress;
 
 const server = new x402ResourceServer(facilitator);
 
@@ -113,6 +116,7 @@ const healthHandler = (c: any) => {
     ],
     relayEndpoint: "/api/botchain/relay",
     payTo: payToAddress,
+    payToType: "AgentPayRegistry UUPS ERC1967 Proxy Smart Contract Vault",
   });
 };
 
