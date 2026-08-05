@@ -1,20 +1,25 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const apiKey = process.env.ANTHROPIC_API_KEY;
-const client = apiKey ? new Anthropic({ apiKey }) : null;
-
-// Use the cheapest Claude model for cost efficiency
-const MODEL = "claude-haiku-4-5-20251001";
+// Helper to get client dynamically per-request (ensuring process.env is populated)
+function getAnthropicClient(): { client: Anthropic | null; model: string } {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || apiKey.trim() === "" || apiKey.includes("your_anthropic_claude_api_key_here")) {
+    return { client: null, model: "claude-3-5-haiku-20241022" };
+  }
+  const model = process.env.ANTHROPIC_MODEL || "claude-3-5-haiku-20241022";
+  return { client: new Anthropic({ apiKey }), model };
+}
 
 export async function generateChatResponse(prompt: string): Promise<string> {
+  const { client, model } = getAnthropicClient();
   if (!client) {
-    console.warn("[AI] ⚠️ No ANTHROPIC_API_KEY set — returning dev fallback response");
+    console.warn("[AI] ⚠️ No ANTHROPIC_API_KEY set in process.env — returning dev fallback response");
     return `[AgentPay AI Dev Fallback] Echo response for prompt: "${prompt}". Powered by Claude on BotChain.`;
   }
   const start = Date.now();
   try {
     const response = await client.messages.create({
-      model: MODEL,
+      model,
       max_tokens: 1024,
       system: "You are AgentPay AI, a fast, helpful AI assistant built on BotChain. Provide concise, helpful answers.",
       messages: [{ role: "user", content: prompt }],
@@ -23,17 +28,18 @@ export async function generateChatResponse(prompt: string): Promise<string> {
     const textBlock = response.content.find((b) => b.type === "text");
     const text = (textBlock as Anthropic.TextBlock)?.text || "No output generated.";
     console.log(
-      `[AI] ✓ chat completed in ${durationMs}ms (${response.usage.input_tokens} in / ${response.usage.output_tokens} out tokens)`
+      `[AI] ✓ chat completed in ${durationMs}ms with ${model} (${response.usage.input_tokens} in / ${response.usage.output_tokens} out tokens)`
     );
     return text;
   } catch (err: any) {
     const durationMs = Date.now() - start;
     console.error(`[AI] ✗ chat failed in ${durationMs}ms:`, err?.message || err);
-    return `[AgentPay AI Fallback] Processed prompt: "${prompt}". Powered by Claude Haiku.`;
+    return `[AgentPay AI Fallback] Processed prompt: "${prompt}". Powered by Claude.`;
   }
 }
 
 export async function enhanceImagePrompt(prompt: string): Promise<string> {
+  const { client, model } = getAnthropicClient();
   if (!client) {
     console.warn("[AI] ⚠️ No ANTHROPIC_API_KEY set — returning fallback image prompt");
     return `High-resolution digital artwork of ${prompt}, vibrant colors, 8k resolution, trending on ArtStation`;
@@ -41,7 +47,7 @@ export async function enhanceImagePrompt(prompt: string): Promise<string> {
   const start = Date.now();
   try {
     const response = await client.messages.create({
-      model: MODEL,
+      model,
       max_tokens: 256,
       messages: [
         {
@@ -54,7 +60,7 @@ export async function enhanceImagePrompt(prompt: string): Promise<string> {
     const textBlock = response.content.find((b) => b.type === "text");
     const enhanced = (textBlock as Anthropic.TextBlock)?.text || prompt;
     console.log(
-      `[AI] ✓ image prompt enhanced in ${durationMs}ms (${response.usage.input_tokens} in / ${response.usage.output_tokens} out tokens)`
+      `[AI] ✓ image prompt enhanced in ${durationMs}ms with ${model} (${response.usage.input_tokens} in / ${response.usage.output_tokens} out tokens)`
     );
     return enhanced;
   } catch (err: any) {
@@ -69,6 +75,7 @@ export async function auditCodeSnippet(code: string): Promise<{
   vulnerabilities: number;
   suggestions: string[];
 }> {
+  const { client, model } = getAnthropicClient();
   if (!client) {
     console.warn("[AI] ⚠️ No ANTHROPIC_API_KEY set — returning dev audit fallback");
     return {
@@ -83,7 +90,7 @@ export async function auditCodeSnippet(code: string): Promise<{
   const start = Date.now();
   try {
     const response = await client.messages.create({
-      model: MODEL,
+      model,
       max_tokens: 512,
       messages: [
         {
@@ -96,7 +103,7 @@ export async function auditCodeSnippet(code: string): Promise<{
     const textBlock = response.content.find((b) => b.type === "text");
     const resultText = (textBlock as Anthropic.TextBlock)?.text || "Code audit complete.";
     console.log(
-      `[AI] ✓ code audit completed in ${durationMs}ms (${response.usage.input_tokens} in / ${response.usage.output_tokens} out tokens)`
+      `[AI] ✓ code audit completed in ${durationMs}ms with ${model} (${response.usage.input_tokens} in / ${response.usage.output_tokens} out tokens)`
     );
     return {
       score: "A",
