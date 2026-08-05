@@ -1,6 +1,9 @@
 import { defineChain, createPublicClient, http } from "viem";
 import { celo, celoSepolia } from "viem/chains";
 
+export const AGENT_PAY_REGISTRY_TESTNET_ADDRESS = "0xc1eBB154EFf9bf9c08e39978E1447cC05e726dC6";
+export const AGENT_PAY_REGISTRY_IMPLEMENTATION_TESTNET_ADDRESS = "0x60C516E2A6F3a6C034AA2D63AE32900D88B3bB4D";
+
 export const botChain = defineChain({
   id: 677,
   name: "BOT Chain",

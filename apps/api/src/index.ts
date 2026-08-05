@@ -31,8 +31,8 @@ const usdtAddress = isMainnet
   ? "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C" // Mainnet USDT
   : "0x75edC9335175Fc0552D51D48439F229c10420fe3"; // Testnet USDT
 
-// Deployed AgentPayRegistry UUPS ERC1967 Proxy Vault Contract
-const defaultProxyVaultAddress = "0x5E07d482079f3ea4d1e5583a22db8f7ab415246B";
+// Deployed AgentPayRegistry UUPS ERC1967 Proxy Vault Contract (BotChain Testnet)
+const defaultProxyVaultAddress = "0xc1eBB154EFf9bf9c08e39978E1447cC05e726dC6";
 
 const payToAddress =
   (process.env.PAYMENT_RECIPIENT_ADDRESS as `0x${string}`) ||
