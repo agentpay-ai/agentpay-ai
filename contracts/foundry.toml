@@ -16,5 +16,7 @@ celo = "https://forno.celo.org"
 celo_sepolia = "https://forno.celo-sepolia.celo-testnet.org"
 
 [etherscan]
-celo = { key = "${CELOSCAN_API_KEY}", url = "https://api.celoscan.io/api" }
-celo_sepolia = { key = "${CELOSCAN_API_KEY}", url = "https://api-sepolia.celoscan.io/api" }
+botchain_testnet = { key = "demo", url = "https://scan.bohr.life/api" }
+botchain_mainnet = { key = "demo", url = "https://scan.botchain.ai/api" }
+celo = { key = "demo", url = "https://api.celoscan.io/api" }
+celo_sepolia = { key = "demo", url = "https://api-sepolia.celoscan.io/api" }

@@ -28,23 +28,35 @@ export function useX402Payment() {
     url: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const ethereum = getEthereum();
-    if (!ethereum) {
-      throw new Error("Web3 / BotChain wallet not available");
-    }
-
     setLoading(true);
     setError(null);
     setTxHash(null);
 
     try {
+      const ethereum = getEthereum();
+      if (!ethereum) {
+        // Fallback to direct fetch if Web3 provider is not injected
+        const res = await fetch(url, {
+          ...options,
+          headers: {
+            "Content-Type": "application/json",
+            ...options.headers,
+          },
+        });
+        if (!res.ok && res.status !== 402) {
+          throw new Error(`HTTP Error ${res.status}: ${res.statusText}`);
+        }
+        const data = (await res.json()) as T;
+        return data;
+      }
+
       const accounts = (await ethereum.request({
         method: "eth_requestAccounts",
       })) as string[];
       const account = accounts[0] as `0x${string}`;
 
       if (!account) {
-        throw new Error("No wallet account connected");
+        throw new Error("No wallet account connected. Please connect your Web3 wallet.");
       }
 
       const walletClient = createWalletClient({
