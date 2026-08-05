@@ -4,10 +4,12 @@ import { getAgentPayMetadata, formatReputationSummary } from "../lib/erc8004.js"
 export const reputationRoute = new Hono();
 
 reputationRoute.get("/agent-metadata.json", (c) => {
+  console.log("[REPUTATION] ← GET /agent-metadata.json");
   return c.json(getAgentPayMetadata());
 });
 
 reputationRoute.get("/reputation", (c) => {
+  console.log("[REPUTATION] ← GET /reputation");
   const summary = formatReputationSummary(98, 142);
   return c.json({
     success: true,
@@ -24,6 +26,8 @@ reputationRoute.post("/reputation/feedback", async (c) => {
   const score = Number(body.score) || 90;
   const tag = body.tag || "starred";
   const notes = body.notes || "Fast response";
+
+  console.log(`[REPUTATION] ← POST /reputation/feedback score=${score} tag=${tag}`);
 
   return c.json({
     success: true,

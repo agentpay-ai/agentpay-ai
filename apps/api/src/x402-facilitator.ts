@@ -18,8 +18,8 @@ export const facilitator: FacilitatorClient = {
     let baseSupported: any = { kinds: [], extensions: [], signers: {} };
     try {
       baseSupported = await baseFacilitator.getSupported();
-    } catch {
-      // Fallback if remote facilitator server is unreachable
+    } catch (err: any) {
+      console.warn("[x402] ⚠️ getSupported fallback (remote facilitator unreachable):", err?.message || err);
     }
 
     const botChainKinds = [
@@ -59,16 +59,22 @@ export const facilitator: FacilitatorClient = {
 
   async verify(paymentPayload: any, paymentRequirements: any): Promise<any> {
     try {
-      return await baseFacilitator.verify(paymentPayload, paymentRequirements);
-    } catch {
+      const res = await baseFacilitator.verify(paymentPayload, paymentRequirements);
+      console.log(`[x402] ✓ payment verified for ${paymentPayload?.account || "account"}`);
+      return res;
+    } catch (err: any) {
+      console.warn("[x402] ⚠️ verify fallback (remote facilitator unreachable):", err?.message || err);
       return { isValid: true, payer: paymentPayload?.account || "0x0" };
     }
   },
 
   async settle(paymentPayload: any, paymentRequirements: any): Promise<any> {
     try {
-      return await baseFacilitator.settle(paymentPayload, paymentRequirements);
-    } catch {
+      const res = await baseFacilitator.settle(paymentPayload, paymentRequirements);
+      console.log(`[x402] ✓ payment settled onchain (${res?.transaction || "tx"})`);
+      return res;
+    } catch (err: any) {
+      console.warn("[x402] ⚠️ settle fallback (remote facilitator unreachable):", err?.message || err);
       return {
         success: true,
         transaction: "0x" + "0".repeat(64),

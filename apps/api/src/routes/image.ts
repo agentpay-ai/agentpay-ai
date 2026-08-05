@@ -6,7 +6,10 @@ export const imageRoute = new Hono();
 imageRoute.post("/image", async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const rawPrompt = body.prompt || "Abstract cybernetic art";
+  console.log(`[IMAGE] ← prompt: "${rawPrompt.slice(0, 80)}${rawPrompt.length > 80 ? "..." : ""}"`);
+
   const enhancedPrompt = await enhanceImagePrompt(rawPrompt);
+  console.log(`[IMAGE] → enhanced: ${enhancedPrompt.length} chars`);
 
   return c.json({
     success: true,
