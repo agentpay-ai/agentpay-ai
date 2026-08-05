@@ -133,4 +133,5 @@ console.log(`🤖 AgentPay AI Gateway with x402 Micropayments starting on port $
 serve({
   fetch: app.fetch,
   port,
+  hostname: "0.0.0.0",
 });
