@@ -4,10 +4,19 @@ import Anthropic from "@anthropic-ai/sdk";
 function getAnthropicClient(): { client: Anthropic | null; model: string } {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey || apiKey.trim() === "" || apiKey.includes("your_anthropic_claude_api_key_here")) {
-    return { client: null, model: "claude-3-5-haiku-20241022" };
+    return { client: null, model: "claude-3-5-sonnet" };
   }
-  const model = process.env.ANTHROPIC_MODEL || "claude-3-5-haiku-20241022";
-  return { client: new Anthropic({ apiKey }), model };
+  const model = process.env.ANTHROPIC_MODEL || "claude-3-5-sonnet";
+  const baseURL = process.env.ANTHROPIC_BASE_URL || (apiKey.startsWith("sk-ant-") ? undefined : "https://agentrouter.org");
+
+  return {
+    client: new Anthropic({
+      apiKey,
+      baseURL,
+      defaultHeaders: baseURL ? { "User-Agent": "Cline/3.0.0" } : undefined,
+    }),
+    model,
+  };
 }
 
 export async function generateChatResponse(prompt: string): Promise<string> {
