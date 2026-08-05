@@ -13,6 +13,7 @@ contract AgentPayRegistryTest is Test {
     address public owner = address(1);
     address public user1 = address(2);
     address public recipient = address(3);
+    address public usdtAsset = address(0x75edC9335175Fc0552D51D48439F229c10420fe3);
 
     function setUp() public {
         vm.startPrank(owner);
@@ -26,23 +27,43 @@ contract AgentPayRegistryTest is Test {
     function test_Initialization() public view {
         assertEq(registry.owner(), owner);
         assertEq(registry.totalPromptsRecorded(), 0);
+        assertFalse(registry.paused());
     }
 
     function test_RecordPrompt() public {
         vm.prank(owner);
-        registry.recordPrompt(user1, "chat");
+        registry.recordPrompt(user1, "agent-001", "chat", 10000, usdtAsset);
 
         assertEq(registry.userPromptCounts(user1), 1);
         assertEq(registry.totalPromptsRecorded(), 1);
+        assertEq(registry.totalVolumePerAsset(usdtAsset), 10000);
     }
 
     function test_RecordPaymentAndPrompt() public {
-        address fakeToken = address(0x123);
         vm.prank(owner);
-        registry.recordPaymentAndPrompt(user1, "image", fakeToken, 50000);
+        registry.recordPaymentAndPrompt(user1, "image", usdtAsset, 50000);
 
         assertEq(registry.userPromptCounts(user1), 1);
         assertEq(registry.totalPromptsRecorded(), 1);
+        assertEq(registry.totalVolumePerAsset(usdtAsset), 50000);
+    }
+
+    function test_PauseAndUnpauseControls() public {
+        vm.prank(owner);
+        registry.pause();
+        assertTrue(registry.paused());
+
+        vm.prank(owner);
+        vm.expectRevert();
+        registry.recordPrompt(user1, "agent-001", "chat", 10000, usdtAsset);
+
+        vm.prank(owner);
+        registry.unpause();
+        assertFalse(registry.paused());
+
+        vm.prank(owner);
+        registry.recordPrompt(user1, "agent-001", "chat", 10000, usdtAsset);
+        assertEq(registry.userPromptCounts(user1), 1);
     }
 
     function test_ReceiveNativeDeposit() public {
@@ -70,6 +91,12 @@ contract AgentPayRegistryTest is Test {
     function testRevert_RecordPromptNonOwner() public {
         vm.prank(user1);
         vm.expectRevert();
-        registry.recordPrompt(user1, "chat");
+        registry.recordPrompt(user1, "agent-001", "chat", 10000, usdtAsset);
+    }
+
+    function testRevert_PauseNonOwner() public {
+        vm.prank(user1);
+        vm.expectRevert();
+        registry.pause();
     }
 }
