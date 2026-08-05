@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import { useBalance } from "@/hooks/useBalance";
+import { useX402Payment } from "@/hooks/useX402Payment";
 import { BalanceBar } from "@/components/BalanceBar";
 import { Image as ImageIcon, Sparkles, Loader2, ArrowLeft, Download } from "lucide-react";
 import Link from "next/link";
@@ -16,24 +17,27 @@ export default function ImagePage() {
     loading: balanceLoading,
     refetch,
   } = useBalance(address, currentChainId);
+  const { executePaidRequest, loading: paymentLoading, error: paymentError } = useX402Payment();
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   async function handleGenerate() {
-    if (!prompt.trim() || loading) return;
+    if (!prompt.trim() || loading || paymentLoading) return;
     setLoading(true);
     setImageUrl(null);
 
     try {
-      const res = await fetch("http://localhost:3001/api/image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
-      const data = await res.json();
-      if (data.imageUrl) {
+      const data = await executePaidRequest<{ imageUrl?: string }>(
+        "http://localhost:3001/api/image",
+        {
+          method: "POST",
+          body: JSON.stringify({ prompt }),
+        }
+      );
+      if (data?.imageUrl) {
         setImageUrl(data.imageUrl);
+        refetch();
       } else {
         setImageUrl("https://placehold.co/512x512/0f172a/f59e0b.png?text=AI+Generated+Image");
       }
@@ -65,42 +69,48 @@ export default function ImagePage() {
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="flex items-center space-x-2">
-            <ImageIcon className="w-5 h-5 text-purple-400" />
-            <h1 className="font-bold text-white text-base">AI Image Creator</h1>
+            <ImageIcon className="w-5 h-5 text-amber-400" />
+            <h1 className="font-bold text-white text-base">AI Image Generator</h1>
           </div>
         </div>
-        <span className="text-xs font-bold bg-slate-900 text-purple-400 px-2.5 py-1 rounded-lg border border-slate-800">
-          $0.05 USDT
+        <span className="text-xs font-bold bg-slate-900 text-emerald-400 px-2.5 py-1 rounded-lg border border-slate-800">
+          $0.02 USDT
         </span>
       </div>
 
       <div className="flex-1 p-4 space-y-4 overflow-y-auto">
         <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs">
-          <div className="flex items-center space-x-1.5 text-purple-400 font-semibold">
+          <div className="flex items-center space-x-1.5 text-amber-400 font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>High-Res 512×512 Image Generation</span>
+            <span>Google Gemini Prompt Enhancer</span>
           </div>
           <p className="text-slate-400">
-            Describe any scene or concept. Each image generation costs $0.05 USDT via x402 on BotChain.
+            Enter a short description. Gemini 2.5 Flash optimizes your prompt and generates high-fidelity visual concepts for $0.02 USDT.
           </p>
         </div>
 
+        {paymentError && (
+          <div className="bg-rose-950/40 border border-rose-800 text-rose-300 rounded-xl p-3 text-xs">
+            {paymentError}
+          </div>
+        )}
+
         {imageUrl && (
-          <div className="bg-slate-900 border border-purple-500/20 rounded-xl p-3 space-y-3">
-            <div className="relative rounded-lg overflow-hidden border border-slate-800 aspect-square bg-slate-950 flex items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt="Generated AI" className="w-full h-full object-cover" />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-400">512×512 PNG</span>
+          <div className="bg-slate-900 border border-amber-500/20 rounded-xl p-4 space-y-3 animate-fade-in text-center">
+            <img
+              src={imageUrl}
+              alt="AI Generated Visual"
+              className="w-full h-64 object-cover rounded-lg border border-slate-800"
+            />
+            <div className="flex justify-center">
               <a
                 href={imageUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center space-x-1 text-xs font-semibold text-purple-400 hover:text-purple-300"
+                className="inline-flex items-center space-x-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Download</span>
+                <span>View High-Res Concept</span>
               </a>
             </div>
           </div>
@@ -108,31 +118,22 @@ export default function ImagePage() {
       </div>
 
       {/* Input Box */}
-      <div className="p-4 border-t border-slate-900 bg-slate-950 space-y-3">
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe image concept (e.g., 'Cyberpunk mobile wallet app interface')..."
-          className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-400/50 resize-none h-20"
-        />
-
-        <button
-          onClick={handleGenerate}
-          disabled={loading || !prompt.trim()}
-          className="w-full bg-purple-500 hover:bg-purple-400 disabled:bg-slate-800 text-slate-950 font-semibold py-2.5 rounded-xl transition text-sm flex items-center justify-center space-x-2"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Generating Image...</span>
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4" />
-              <span>Generate Image ($0.05 USDm)</span>
-            </>
-          )}
-        </button>
+      <div className="p-4 border-t border-slate-900 bg-slate-950 space-y-2">
+        <div className="relative">
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Describe the image concept to generate..."
+            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 pr-12 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400/50 resize-none h-20"
+          />
+          <button
+            onClick={handleGenerate}
+            disabled={loading || paymentLoading || !prompt.trim()}
+            className="absolute bottom-3 right-3 p-2 bg-amber-400 hover:bg-amber-300 disabled:bg-slate-800 text-slate-950 rounded-lg transition"
+          >
+            {loading || paymentLoading ? <Loader2 className="w-4 h-4 animate-spin text-slate-400" /> : <Sparkles className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
     </main>
   );

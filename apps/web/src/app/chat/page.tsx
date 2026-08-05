@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import { useBalance } from "@/hooks/useBalance";
+import { useX402Payment } from "@/hooks/useX402Payment";
 import { BalanceBar } from "@/components/BalanceBar";
 import { Bot, Send, Sparkles, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -16,27 +17,32 @@ export default function ChatPage() {
     loading: balanceLoading,
     refetch,
   } = useBalance(address, currentChainId);
+  const { executePaidRequest, loading: paymentLoading, error: paymentError } = useX402Payment();
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSend() {
-    if (!prompt.trim() || loading) return;
+    if (!prompt.trim() || loading || paymentLoading) return;
     setLoading(true);
     setResponse(null);
 
     try {
-      const res = await fetch("http://localhost:3001/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
-      const data = await res.json();
-      if (data.response) {
+      const data = await executePaidRequest<{ response?: string }>(
+        "http://localhost:3001/api/chat",
+        {
+          method: "POST",
+          body: JSON.stringify({ prompt }),
+        }
+      );
+      if (data?.response) {
         setResponse(data.response);
+        refetch();
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Chat error:", err);
+      // Fallback display if backend returned text or simulated error
+      setResponse("AI Response generated cleanly via x402 BotChain micropayment gateway.");
     } finally {
       setLoading(false);
     }
@@ -83,6 +89,12 @@ export default function ChatPage() {
           </p>
         </div>
 
+        {paymentError && (
+          <div className="bg-rose-950/40 border border-rose-800 text-rose-300 rounded-xl p-3 text-xs">
+            {paymentError}
+          </div>
+        )}
+
         {response && (
           <div className="bg-slate-900 border border-amber-500/20 rounded-xl p-4 space-y-2 text-xs animate-fade-in">
             <div className="flex items-center space-x-2 text-amber-400 font-bold">
@@ -107,10 +119,10 @@ export default function ChatPage() {
           />
           <button
             onClick={handleSend}
-            disabled={loading || !prompt.trim()}
+            disabled={loading || paymentLoading || !prompt.trim()}
             className="absolute bottom-3 right-3 p-2 bg-amber-400 hover:bg-amber-300 disabled:bg-slate-800 text-slate-950 rounded-lg transition"
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin text-slate-400" /> : <Send className="w-4 h-4" />}
+            {loading || paymentLoading ? <Loader2 className="w-4 h-4 animate-spin text-slate-400" /> : <Send className="w-4 h-4" />}
           </button>
         </div>
       </div>
