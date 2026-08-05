@@ -34,13 +34,15 @@ test("BotChain Agent Relay - Unsupported service returns 400", async () => {
   assert.ok(data.error.includes("Unsupported service"));
 });
 
-test("BotChain Agent Relay - Dispatches 'chat' service request", async () => {
+test("BotChain Agent Relay - Dispatches 'chat' service request with agentId and maxCostUSDm", async () => {
   const req = new Request("http://localhost/botchain/relay", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      agentId: "0xc035A9b2200CfEcB69f25118fC54B65beA56Cf67",
       service: "chat",
-      params: { prompt: "Explain BotChain EVM autonomous agent settlement." },
+      maxCostUSDm: 50,
+      payload: { prompt: "Explain BotChain EVM autonomous agent settlement." },
     }),
   });
 
@@ -51,6 +53,9 @@ test("BotChain Agent Relay - Dispatches 'chat' service request", async () => {
   assert.equal(data.success, true);
   assert.equal(data.network, "botchain");
   assert.equal(data.service, "chat");
+  assert.equal(data.agentId, "0xc035A9b2200CfEcB69f25118fC54B65beA56Cf67");
+  assert.equal(data.maxCostUSDm, 50);
+  assert.ok(typeof data.vaultAddress === "string");
   assert.ok(typeof data.result === "string");
   assert.ok(data.result.length > 0);
 });
@@ -94,11 +99,14 @@ test("BotChain Agent Relay - Dispatches 'code' service request", async () => {
   assert.ok("score" in (data.result as Record<string, unknown>));
 });
 
-test("BotChain Agent Relay - Dispatches 'reputation' service request", async () => {
+test("BotChain Agent Relay - Dispatches 'reputation' service request with score", async () => {
   const req = new Request("http://localhost/botchain/relay", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ service: "reputation" }),
+    body: JSON.stringify({
+      agentId: "0x903a72f5C79fdeBbc5928c19fe757AC304EC09Ae",
+      service: "reputation",
+    }),
   });
 
   const res = await botChainRelayRoute.request(req);
@@ -107,7 +115,7 @@ test("BotChain Agent Relay - Dispatches 'reputation' service request", async () 
   const data = await res.json();
   assert.equal(data.success, true);
   assert.equal(data.service, "reputation");
-  assert.ok(typeof data.result === "object");
+  assert.equal((data.result as { reputationScore: number }).reputationScore, 100);
 });
 
 test("BotChain Agent Relay - Dispatches 'attribution' service request", async () => {

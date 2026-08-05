@@ -19,8 +19,8 @@
 - [x] ERC-8004 Agent Identity & Reputation registered with tailored schema CI
 - [x] ERC-8021 Attribution Tags integrated for leaderboard tracking
 - [x] BotChain Ecosystem & Autonomous Agent Network docs integrated
-- [ ] `AgentPayRegistry.sol` deployed to BotChain EVM (Testnet/Mainnet) & Celo (Sepolia/Mainnet)
-- [ ] BotChain Programmatic Agent Relay Gateway (`/api/botchain/relay`) E2E tested
+- [x] `AgentPayRegistry.sol` deployed & verified on BotChain Testnet (`0xc1eBB154EFf9bf9c08e39978E1447cC05e726dC6`)
+- [x] BotChain Programmatic Agent Relay Gateway (`/api/botchain/relay`) E2E tested
 - [ ] AgentPay API deployed to Railway (BotChain + Celo RPC)
 - [ ] BotChain Ecosystem Support Program Application & BOT Infrastructure Grant submission
 - [ ] Talent App Celo enrollment (Secondary submission)
@@ -40,13 +40,13 @@
 - [x] ERC-8021 Attribution Tags integrated for leaderboard tracking
 - [x] Mobile UI complete for Chat, Image, Code & History tools
 
-### 📅 Week 2 — BotChain Smart Contracts & Multi-Chain Layer (Phases 7, 7.5 & 8)
+### 📅 Week 2 — BotChain Smart Contracts & Multi-Chain Layer (Phases 7, 7.5 & 8 Complete)
 - [x] UUPS Upgradeable `AgentPayRegistry.sol` developed & unit tested (100% Foundry coverage, 8/8 tests pass)
-- [x] `DeployBotChainRegistry.s.sol` script created & simulated on BotChain Testnet (`968`)
-- [x] `PAYMENT_RECIPIENT_ADDRESS` configured to UUPS ERC1967 Proxy Vault Contract (`0x5E07d482079f3ea4d1e5583a22db8f7ab415246B`)
+- [x] Deployed & verified on BotChain Testnet (`0xc1eBB154EFf9bf9c08e39978E1447cC05e726dC6`)
+- [x] `PAYMENT_RECIPIENT_ADDRESS` configured to UUPS ERC1967 Proxy Vault Contract (`0xc1eBB154EFf9bf9c08e39978E1447cC05e726dC6`)
 - [x] BotChain Agent Relay gateway (`/api/botchain/relay`) developed & tested (20/20 API tests pass)
-- [ ] End-to-end payment test on BotChain & MiniPay
-- [ ] PageSpeed score 90+
+- [x] End-to-end payment test on BotChain & MiniPay
+- [x] PageSpeed score 90+
 
 ### 📅 Week 3 — Mainnet Production & BotChain Grant Submission (Phases 9 & 10)
 - [ ] `AgentPayRegistry.sol` deployed to BotChain Mainnet & Celo Mainnet
@@ -58,5 +58,4 @@
 
 ### 📅 Week 4 — Scale & Submission (Phase 11)
 - [ ] BotChain AI Agent demo video recorded (60-90 seconds)
-- [ ] Final multi-chain submission on BotChain Ecosystem portal & Talent App
-- [ ] Final build-in-public posts on Twitter/X (@BotChainAI, @CeloOrg)
+- [ ] Final whitepaper submission & open-source developer docs release

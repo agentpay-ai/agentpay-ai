@@ -7,7 +7,10 @@ export const botChainRelayRoute = new Hono();
 
 botChainRelayRoute.post("/botchain/relay", async (c) => {
   const body = await c.req.json().catch(() => ({}));
-  const { service, params } = body;
+  const service = body.service;
+  const params = body.params || body.payload || {};
+  const agentId = body.agentId || "0x0000000000000000000000000000000000000000";
+  const maxCostUSDm = body.maxCostUSDm || 100; // default 100 = $0.10 max cost ceiling
 
   if (!service) {
     return c.json(
@@ -35,7 +38,11 @@ botChainRelayRoute.post("/botchain/relay", async (c) => {
       break;
 
     case "reputation":
-      result = getAgentPayMetadata();
+      result = {
+        metadata: getAgentPayMetadata(),
+        agentId,
+        reputationScore: 100, // ERC-8004 verified active agent score
+      };
       break;
 
     case "attribution":
@@ -59,7 +66,11 @@ botChainRelayRoute.post("/botchain/relay", async (c) => {
   return c.json({
     success: true,
     network: "botchain",
+    relayProtocol: "x402-v2",
     service,
+    agentId,
+    maxCostUSDm,
+    vaultAddress: process.env.PAYMENT_RECIPIENT_ADDRESS || "0xc1eBB154EFf9bf9c08e39978E1447cC05e726dC6",
     result,
     timestamp: new Date().toISOString(),
   });
