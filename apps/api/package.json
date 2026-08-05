@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "test": "tsx --test test/gemini.test.ts test/erc8004.test.ts test/attribution.test.ts test/ui-integration.test.ts",
+    "test": "tsx --test test/gemini.test.ts test/erc8004.test.ts test/attribution.test.ts test/ui-integration.test.ts test/botchain-relay.test.ts",
     "test:gemini": "tsx --test test/gemini.test.ts",
     "test:erc8004": "tsx --test test/erc8004.test.ts",
     "test:erc8021": "tsx --test test/attribution.test.ts",
     "test:ui": "tsx --test test/ui-integration.test.ts",
+    "test:relay": "tsx --test test/botchain-relay.test.ts",
     "start": "node dist/index.js"
   },
   "dependencies": {
