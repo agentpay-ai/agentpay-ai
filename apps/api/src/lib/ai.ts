@@ -4,9 +4,9 @@ import Anthropic from "@anthropic-ai/sdk";
 function getAnthropicClient(): { client: Anthropic | null; model: string } {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey || apiKey.trim() === "" || apiKey.includes("your_anthropic_claude_api_key_here")) {
-    return { client: null, model: "claude-3-5-sonnet" };
+    return { client: null, model: "claude-opus-5" };
   }
-  const model = process.env.ANTHROPIC_MODEL || "claude-3-5-sonnet";
+  const model = process.env.ANTHROPIC_MODEL || "claude-opus-5";
   const baseURL = process.env.ANTHROPIC_BASE_URL || (apiKey.startsWith("sk-ant-") ? undefined : "https://agentrouter.org");
 
   return {
@@ -19,6 +19,31 @@ function getAnthropicClient(): { client: Anthropic | null; model: string } {
   };
 }
 
+// Robust response normalizer for both standard Anthropic SDK objects and AgentRouter JSON strings
+function normalizeAnthropicResponse(rawResponse: any): { text: string; inputTokens: number; outputTokens: number } {
+  let resObj = rawResponse;
+  if (typeof rawResponse === "string") {
+    try {
+      resObj = JSON.parse(rawResponse);
+    } catch {
+      return { text: rawResponse, inputTokens: 0, outputTokens: 0 };
+    }
+  }
+
+  let text = "";
+  if (Array.isArray(resObj?.content)) {
+    const textBlock = resObj.content.find((b: any) => b.type === "text" || b.text);
+    text = textBlock?.text || "";
+  } else if (typeof resObj?.content === "string") {
+    text = resObj.content;
+  }
+
+  const inputTokens = resObj?.usage?.input_tokens || 0;
+  const outputTokens = resObj?.usage?.output_tokens || 0;
+
+  return { text: text || "No output generated.", inputTokens, outputTokens };
+}
+
 export async function generateChatResponse(prompt: string): Promise<string> {
   const { client, model } = getAnthropicClient();
   if (!client) {
@@ -27,17 +52,16 @@ export async function generateChatResponse(prompt: string): Promise<string> {
   }
   const start = Date.now();
   try {
-    const response = await client.messages.create({
+    const rawResponse = await client.messages.create({
       model,
       max_tokens: 1024,
       system: "You are AgentPay AI, a fast, helpful AI assistant built on BotChain. Provide concise, helpful answers.",
       messages: [{ role: "user", content: prompt }],
     });
     const durationMs = Date.now() - start;
-    const textBlock = response.content.find((b) => b.type === "text");
-    const text = (textBlock as Anthropic.TextBlock)?.text || "No output generated.";
+    const { text, inputTokens, outputTokens } = normalizeAnthropicResponse(rawResponse);
     console.log(
-      `[AI] ✓ chat completed in ${durationMs}ms with ${model} (${response.usage.input_tokens} in / ${response.usage.output_tokens} out tokens)`
+      `[AI] ✓ chat completed in ${durationMs}ms with ${model} (${inputTokens} in / ${outputTokens} out tokens)`
     );
     return text;
   } catch (err: any) {
@@ -55,7 +79,7 @@ export async function enhanceImagePrompt(prompt: string): Promise<string> {
   }
   const start = Date.now();
   try {
-    const response = await client.messages.create({
+    const rawResponse = await client.messages.create({
       model,
       max_tokens: 256,
       messages: [
@@ -66,12 +90,11 @@ export async function enhanceImagePrompt(prompt: string): Promise<string> {
       ],
     });
     const durationMs = Date.now() - start;
-    const textBlock = response.content.find((b) => b.type === "text");
-    const enhanced = (textBlock as Anthropic.TextBlock)?.text || prompt;
+    const { text, inputTokens, outputTokens } = normalizeAnthropicResponse(rawResponse);
     console.log(
-      `[AI] ✓ image prompt enhanced in ${durationMs}ms with ${model} (${response.usage.input_tokens} in / ${response.usage.output_tokens} out tokens)`
+      `[AI] ✓ image prompt enhanced in ${durationMs}ms with ${model} (${inputTokens} in / ${outputTokens} out tokens)`
     );
-    return enhanced;
+    return text || prompt;
   } catch (err: any) {
     const durationMs = Date.now() - start;
     console.error(`[AI] ✗ image prompt enhancement failed in ${durationMs}ms:`, err?.message || err);
@@ -98,7 +121,7 @@ export async function auditCodeSnippet(code: string): Promise<{
   }
   const start = Date.now();
   try {
-    const response = await client.messages.create({
+    const rawResponse = await client.messages.create({
       model,
       max_tokens: 512,
       messages: [
@@ -109,15 +132,14 @@ export async function auditCodeSnippet(code: string): Promise<{
       ],
     });
     const durationMs = Date.now() - start;
-    const textBlock = response.content.find((b) => b.type === "text");
-    const resultText = (textBlock as Anthropic.TextBlock)?.text || "Code audit complete.";
+    const { text, inputTokens, outputTokens } = normalizeAnthropicResponse(rawResponse);
     console.log(
-      `[AI] ✓ code audit completed in ${durationMs}ms with ${model} (${response.usage.input_tokens} in / ${response.usage.output_tokens} out tokens)`
+      `[AI] ✓ code audit completed in ${durationMs}ms with ${model} (${inputTokens} in / ${outputTokens} out tokens)`
     );
     return {
       score: "A",
       vulnerabilities: 0,
-      suggestions: [resultText],
+      suggestions: [text || "Code audit complete."],
     };
   } catch (err: any) {
     const durationMs = Date.now() - start;
