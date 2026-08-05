@@ -11,6 +11,7 @@ import { imageRoute } from "./routes/image.js";
 import { codeRoute } from "./routes/code.js";
 import { reputationRoute } from "./routes/reputation.js";
 import { attributionRoute } from "./routes/attribution.js";
+import { botChainRelayRoute } from "./routes/botchain-relay.js";
 
 config();
 
@@ -19,57 +20,81 @@ const app = new Hono();
 app.use("*", cors());
 
 const isMainnet = process.env.X402_NETWORK === "mainnet";
-const networkCaip2 = (isMainnet ? "eip155:42220" : "eip155:11142220") as `${string}:${string}`;
-const usdcAddress = isMainnet
-  ? "0xcebA9300f2b948710d2653dD7B07f33A8B32118C"
-  : "0x01C5C0122039549AD1493B8220cABEdD739BC44E";
+
+// BotChain CAIP-2 Identifiers
+const botChainTestnetCaip = "eip155:968" as const;
+const botChainMainnetCaip = "eip155:677" as const;
+const activeBotChainCaip = isMainnet ? botChainMainnetCaip : botChainTestnetCaip;
+
+// Verified BotChain USDT Addresses (6 decimals)
+const usdtAddress = isMainnet
+  ? "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C" // Mainnet USDT
+  : "0x75edC9335175Fc0552D51D48439F229c10420fe3"; // Testnet USDT
 
 const payToAddress =
   (process.env.PAYMENT_RECIPIENT_ADDRESS as `0x${string}`) ||
   "0x199A6E94191d4e0ebB7DE602C5E78a83F204E6C3";
 
 const server = new x402ResourceServer(facilitator);
-server.register(networkCaip2, new ExactEvmScheme());
+
+// Register schemes for all supported networks (BotChain EVM + Celo Fallbacks)
+server.register(botChainTestnetCaip, new ExactEvmScheme());
+server.register(botChainMainnetCaip, new ExactEvmScheme());
+server.register("eip155:42220", new ExactEvmScheme());
+server.register("eip155:11142220", new ExactEvmScheme());
 
 const routes: RoutesConfig = {
   "POST /api/chat": {
     accepts: {
       scheme: "exact",
-      network: networkCaip2,
+      network: activeBotChainCaip,
       payTo: payToAddress,
       price: {
-        amount: "10000", // $0.01 USDC (6 decimals)
-        asset: usdcAddress,
-        extra: { name: "USDC", version: "2" },
+        amount: "10000", // $0.01 USDT (6 decimals)
+        asset: usdtAddress,
+        extra: { name: "USDT", version: "1" },
       },
     },
-    description: "Google Gemini Flash AI Chat Prompt ($0.01)",
+    description: "Google Gemini Flash AI Chat Prompt ($0.01 USDT)",
   },
   "POST /api/image": {
     accepts: {
       scheme: "exact",
-      network: networkCaip2,
+      network: activeBotChainCaip,
       payTo: payToAddress,
       price: {
-        amount: "50000", // $0.05 USDC (6 decimals)
-        asset: usdcAddress,
-        extra: { name: "USDC", version: "2" },
+        amount: "50000", // $0.05 USDT (6 decimals)
+        asset: usdtAddress,
+        extra: { name: "USDT", version: "1" },
       },
     },
-    description: "AI Image Generation ($0.05)",
+    description: "AI Image Generation ($0.05 USDT)",
   },
   "POST /api/code": {
     accepts: {
       scheme: "exact",
-      network: networkCaip2,
+      network: activeBotChainCaip,
       payTo: payToAddress,
       price: {
-        amount: "20000", // $0.02 USDC (6 decimals)
-        asset: usdcAddress,
-        extra: { name: "USDC", version: "2" },
+        amount: "20000", // $0.02 USDT (6 decimals)
+        asset: usdtAddress,
+        extra: { name: "USDT", version: "1" },
       },
     },
-    description: "AI Code Security & Audit ($0.02)",
+    description: "AI Code Security & Audit ($0.02 USDT)",
+  },
+  "POST /api/botchain/relay": {
+    accepts: {
+      scheme: "exact",
+      network: activeBotChainCaip,
+      payTo: payToAddress,
+      price: {
+        amount: "10000", // $0.01 USDT (6 decimals)
+        asset: usdtAddress,
+        extra: { name: "USDT", version: "1" },
+      },
+    },
+    description: "BotChain Autonomous Agent Programmatic Relay ($0.01 USDT)",
   },
 };
 
@@ -81,7 +106,12 @@ app.get("/health", (c) => {
     service: "AgentPay AI API Gateway",
     timestamp: new Date().toISOString(),
     aiProvider: "Google Gemini Flash",
-    network: networkCaip2,
+    network: activeBotChainCaip,
+    supportedNetworks: [
+      { name: "BotChain Testnet", caip2: botChainTestnetCaip, chainId: 968 },
+      { name: "BotChain Mainnet", caip2: botChainMainnetCaip, chainId: 677 },
+    ],
+    relayEndpoint: "/api/botchain/relay",
     payTo: payToAddress,
   });
 });
@@ -91,6 +121,7 @@ app.route("/api", imageRoute);
 app.route("/api", codeRoute);
 app.route("/api", reputationRoute);
 app.route("/api", attributionRoute);
+app.route("/api", botChainRelayRoute);
 
 const port = Number(process.env.PORT) || 3001;
 
