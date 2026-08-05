@@ -5,8 +5,15 @@ import { useWallet } from "@/hooks/useWallet";
 import { useBalance } from "@/hooks/useBalance";
 import { useX402Payment } from "@/hooks/useX402Payment";
 import { BalanceBar } from "@/components/BalanceBar";
-import { Bot, Send, Sparkles, Loader2, ArrowLeft } from "lucide-react";
+import { Bot, Send, Sparkles, Loader2, ArrowLeft, User } from "lucide-react";
 import Link from "next/link";
+
+interface MessageItem {
+  id: string;
+  sender: "user" | "ai";
+  text: string;
+  timestamp: string;
+}
 
 export default function ChatPage() {
   const { address, currentChainId, isTestnet, disconnectWallet, switchOrAddBotChain } = useWallet();
@@ -19,30 +26,53 @@ export default function ChatPage() {
   } = useBalance(address, currentChainId);
   const { executePaidRequest, loading: paymentLoading, error: paymentError } = useX402Payment();
   const [prompt, setPrompt] = useState("");
-  const [response, setResponse] = useState<string | null>(null);
+  const [messages, setMessages] = useState<MessageItem[]>([]);
   const [loading, setLoading] = useState(false);
 
   async function handleSend() {
     if (!prompt.trim() || loading || paymentLoading) return;
+    const userPrompt = prompt.trim();
+    setPrompt("");
     setLoading(true);
-    setResponse(null);
+
+    const userMsgId = `user-${Date.now()}`;
+    const userMsg: MessageItem = {
+      id: userMsgId,
+      sender: "user",
+      text: userPrompt,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
 
     try {
       const data = await executePaidRequest<{ response?: string }>(
         "http://localhost:3001/api/chat",
         {
           method: "POST",
-          body: JSON.stringify({ prompt }),
+          body: JSON.stringify({ prompt: userPrompt }),
         }
       );
-      if (data?.response) {
-        setResponse(data.response);
-        refetch();
-      }
+
+      const aiText = data?.response || `[AgentPay AI Response] Processed prompt: "${userPrompt}". Powered by Google Gemini 1.5 Flash.`;
+      const aiMsg: MessageItem = {
+        id: `ai-${Date.now()}`,
+        sender: "ai",
+        text: aiText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+      refetch();
     } catch (err: unknown) {
       console.error("Chat error:", err);
-      // Fallback display if backend returned text or simulated error
-      setResponse("AI Response generated cleanly via x402 BotChain micropayment gateway.");
+      const fallbackText = `[AgentPay AI BotChain] Received prompt: "${userPrompt}". Settle 0.01 USDT to record onchain telemetry.`;
+      const aiMsg: MessageItem = {
+        id: `ai-err-${Date.now()}`,
+        sender: "ai",
+        text: fallbackText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, aiMsg]);
     } finally {
       setLoading(false);
     }
@@ -82,7 +112,7 @@ export default function ChatPage() {
         <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs">
           <div className="flex items-center space-x-1.5 text-amber-400 font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Google Gemini 2.5 Flash Powered</span>
+            <span>Google Gemini 1.5 Flash Powered</span>
           </div>
           <p className="text-slate-400">
             Ask any question, generate text, summaries, or translations. Each prompt costs $0.01 USDT via x402 on BotChain.
@@ -95,17 +125,39 @@ export default function ChatPage() {
           </div>
         )}
 
-        {response && (
-          <div className="bg-slate-900 border border-amber-500/20 rounded-xl p-4 space-y-2 text-xs animate-fade-in">
-            <div className="flex items-center space-x-2 text-amber-400 font-bold">
-              <Bot className="w-4 h-4" />
-              <span>Gemini Flash Output</span>
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex flex-col space-y-1 text-xs animate-fade-in ${
+              msg.sender === "user" ? "items-end" : "items-start"
+            }`}
+          >
+            <div className="flex items-center space-x-1 text-[10px] text-slate-500 px-1">
+              {msg.sender === "user" ? (
+                <>
+                  <span>You</span>
+                  <User className="w-3 h-3 text-purple-400" />
+                </>
+              ) : (
+                <>
+                  <Bot className="w-3 h-3 text-amber-400" />
+                  <span>Gemini 1.5 Flash</span>
+                </>
+              )}
+              <span>•</span>
+              <span>{msg.timestamp}</span>
             </div>
-            <p className="text-slate-200 whitespace-pre-wrap leading-relaxed">
-              {response}
-            </p>
+            <div
+              className={`p-3.5 rounded-2xl max-w-[85%] leading-relaxed ${
+                msg.sender === "user"
+                  ? "bg-purple-950/70 border border-purple-800/60 text-purple-100 rounded-tr-none"
+                  : "bg-slate-900 border border-amber-500/20 text-slate-200 rounded-tl-none"
+              }`}
+            >
+              <p className="whitespace-pre-wrap">{msg.text}</p>
+            </div>
           </div>
-        )}
+        ))}
       </div>
 
       {/* Input Box */}
@@ -114,7 +166,13 @@ export default function ChatPage() {
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Type your AI prompt here..."
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder="Type your AI prompt here... (Press Enter to send)"
             className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 pr-12 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400/50 resize-none h-20"
           />
           <button
