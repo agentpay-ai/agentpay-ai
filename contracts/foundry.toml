@@ -4,8 +4,14 @@ out = "out"
 libs = ["lib"]
 solc_version = "0.8.24"
 evm_version = "cancun"
+remappings = [
+  "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+  "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/"
+]
 
 [rpc_endpoints]
+botchain_testnet = "https://rpc.bohr.life"
+botchain_mainnet = "https://rpc.botchain.ai"
 celo = "https://forno.celo.org"
 celo_sepolia = "https://forno.celo-sepolia.celo-testnet.org"
 
