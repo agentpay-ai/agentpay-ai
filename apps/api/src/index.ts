@@ -108,7 +108,7 @@ const healthHandler = (c: any) => {
     status: "ok",
     service: "AgentPay AI API Gateway",
     timestamp: new Date().toISOString(),
-    aiProvider: "Google Gemini Flash",
+    aiProvider: "Anthropic Claude Haiku 4.5",
     network: activeBotChainCaip,
     supportedNetworks: [
       { name: "BotChain Testnet", caip2: botChainTestnetCaip, chainId: 968 },

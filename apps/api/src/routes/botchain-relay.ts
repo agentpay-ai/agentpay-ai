@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { generateChatResponse, enhanceImagePrompt, auditCodeSnippet } from "../lib/gemini.js";
+import { generateChatResponse, enhanceImagePrompt, auditCodeSnippet } from "../lib/ai.js";
 import { getAgentPayMetadata } from "../lib/erc8004.js";
 import { appendAttributionTag } from "../lib/attribution.js";
 
