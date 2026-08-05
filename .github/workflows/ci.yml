@@ -114,6 +114,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
@@ -121,8 +123,11 @@ jobs:
       - name: Install OpenZeppelin dependencies if missing
         run: |
           cd contracts
-          if [ ! -d "lib/openzeppelin-contracts" ]; then
-            forge install openzeppelin/openzeppelin-contracts
+          if [ ! -d "lib/openzeppelin-contracts/contracts" ]; then
+            forge install openzeppelin/openzeppelin-contracts --no-commit || true
+          fi
+          if [ ! -d "lib/openzeppelin-contracts-upgradeable/contracts" ]; then
+            git clone --depth 1 https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable lib/openzeppelin-contracts-upgradeable
           fi
       - name: Run forge build & test
         run: |
