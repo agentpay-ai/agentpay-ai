@@ -100,7 +100,7 @@ const routes: RoutesConfig = {
 
 app.use("/api/*", paymentMiddleware(routes, server));
 
-app.get("/health", (c) => {
+const healthHandler = (c: any) => {
   return c.json({
     status: "ok",
     service: "AgentPay AI API Gateway",
@@ -114,7 +114,10 @@ app.get("/health", (c) => {
     relayEndpoint: "/api/botchain/relay",
     payTo: payToAddress,
   });
-});
+};
+
+app.get("/health", healthHandler);
+app.get("/api/health", healthHandler);
 
 app.route("/api", chatRoute);
 app.route("/api", imageRoute);
