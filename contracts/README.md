@@ -1,66 +1,27 @@
-## Foundry
+# AgentPay AI — Smart Contracts Suite
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+The `contracts` directory contains the Solidity smart contract suite for **AgentPay AI**, built with **Foundry** and using OpenZeppelin's **UUPS Upgradeable (ERC-1967)** standard.
 
-Foundry consists of:
+---
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## 📜 Deployed Contracts
 
-## Documentation
+### **BotChain Testnet (`Chain ID: 968`)**
+- **RPC Endpoint**: `https://rpc.bohr.life`
+- **Block Explorer**: `https://scan.bohr.life`
+- **UUPS ERC1967 Proxy Vault Contract (`PAYMENT_RECIPIENT_ADDRESS` / `payTo`)**:  
+  [`0xc1eBB154EFf9bf9c08e39978E1447cC05e726dC6`](https://scan.bohr.life/address/0xc1eBB154EFf9bf9c08e39978E1447cC05e726dC6)
+- **Implementation Contract**:  
+  [`0x60C516E2A6F3a6C034AA2D63AE32900D88B3bB4D`](https://scan.bohr.life/address/0x60C516E2A6F3a6C034AA2D63AE32900D88B3bB4D)
 
-https://book.getfoundry.sh/
+---
 
-## Usage
+## 🛠️ Local Development & Testing
 
-### Build
+```bash
+# Run 100% Foundry Unit Test Suite
+forge test
 
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+# Run deployment script simulation for BotChain Testnet
+PRIVATE_KEY=<your_private_key> forge script script/DeployBotChainRegistry.s.sol --rpc-url botchain_testnet
 ```
