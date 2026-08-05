@@ -4,6 +4,7 @@ import { appendAttributionTag, DEFAULT_PROJECT_TAG, ERC8021_MAGIC_TAG } from "..
 export const attributionRoute = new Hono();
 
 attributionRoute.get("/attribution/tag", (c) => {
+  console.log("[ATTRIBUTION] ← GET /attribution/tag");
   const taggedSample = appendAttributionTag("0x");
   return c.json({
     success: true,

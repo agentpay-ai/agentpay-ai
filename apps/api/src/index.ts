@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { logger } from "hono/logger";
 import { serve } from "@hono/node-server";
 import { config } from "dotenv";
 import { paymentMiddleware } from "@x402/hono";
@@ -18,6 +19,7 @@ config();
 const app = new Hono();
 
 app.use("*", cors());
+app.use("*", logger());
 
 const isMainnet = process.env.X402_NETWORK === "mainnet";
 
@@ -58,7 +60,7 @@ const routes: RoutesConfig = {
         extra: { name: "USDT", version: "1" },
       },
     },
-    description: "Google Gemini Flash AI Chat Prompt ($0.01 USDT)",
+    description: "Claude AI Chat Prompt ($0.01 USDT)",
   },
   "POST /api/image": {
     accepts: {
@@ -132,7 +134,12 @@ app.route("/api", botChainRelayRoute);
 
 const port = Number(process.env.PORT) || 3001;
 
-console.log(`🤖 AgentPay AI Gateway with x402 Micropayments starting on port ${port}...`);
+console.log(`🤖 AgentPay AI Gateway starting on port ${port}...`);
+console.log(`   Network:     ${activeBotChainCaip} (${isMainnet ? "MAINNET" : "TESTNET"})`);
+console.log(`   AI Provider: Anthropic Claude Haiku 4.5 ${process.env.ANTHROPIC_API_KEY ? "✅ key loaded" : "⚠️  no key (fallback mode)"}`);
+console.log(`   Vault:       ${payToAddress}`);
+console.log(`   USDT Asset:  ${usdtAddress}`);
+console.log(`   Routes:      /api/chat, /api/image, /api/code, /api/botchain/relay`);
 
 serve({
   fetch: app.fetch,

@@ -6,7 +6,10 @@ export const chatRoute = new Hono();
 chatRoute.post("/chat", async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const prompt = body.prompt || "Hello Claude";
+  console.log(`[CHAT] ← prompt: "${prompt.slice(0, 80)}${prompt.length > 80 ? "..." : ""}"`);
+
   const response = await generateChatResponse(prompt);
+  console.log(`[CHAT] → response: ${response.length} chars`);
 
   return c.json({
     success: true,

@@ -12,7 +12,10 @@ botChainRelayRoute.post("/botchain/relay", async (c) => {
   const agentId = body.agentId || "0x0000000000000000000000000000000000000000";
   const maxCostUSDm = body.maxCostUSDm || 100; // default 100 = $0.10 max cost ceiling
 
+  console.log(`[RELAY] ← service=${service || "NONE"} agentId=${agentId} maxCostUSDm=${maxCostUSDm}`);
+
   if (!service) {
+    console.warn("[RELAY] ✗ 400 Bad Request: Missing service parameter");
     return c.json(
       {
         success: false,
@@ -53,6 +56,7 @@ botChainRelayRoute.post("/botchain/relay", async (c) => {
       break;
 
     default:
+      console.warn(`[RELAY] ✗ 400 Bad Request: Unsupported service '${service}'`);
       return c.json(
         {
           success: false,
@@ -62,6 +66,8 @@ botChainRelayRoute.post("/botchain/relay", async (c) => {
         400
       );
   }
+
+  console.log(`[RELAY] → service '${service}' dispatches successfully`);
 
   return c.json({
     success: true,
