@@ -3,13 +3,32 @@
 import { useState } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import { useBalance } from "@/hooks/useBalance";
-import { useX402Payment } from "@/hooks/useX402Payment";
+import { usePaidService } from "@/hooks/usePaidService";
+import { useCanSwitchNetwork } from "@/hooks/useCanSwitchNetwork";
 import { BalanceBar } from "@/components/BalanceBar";
-import { Code, Sparkles, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Code, Sparkles, Loader2, ArrowLeft, ShieldCheck, Wallet } from "lucide-react";
 import Link from "next/link";
 
+interface AuditReport {
+  score: string;
+  vulnerabilities: number;
+  summary: string;
+  suggestions: string[];
+}
+
 export default function CodePage() {
-  const { address, currentChainId, isTestnet, disconnectWallet, switchOrAddBotChain } = useWallet();
+  const allowNetworkSwitch = useCanSwitchNetwork();
+  const { disconnectWallet, switchOrAddBotChain } = useWallet();
+  const {
+    address,
+    authenticated,
+    connectWallet,
+    isTestnet,
+    currentChainId,
+    runPaid,
+    loading: paidLoading,
+    error: paymentError,
+  } = usePaidService("code");
   const {
     botBalance,
     usdtBalance,
@@ -17,36 +36,33 @@ export default function CodePage() {
     loading: balanceLoading,
     refetch,
   } = useBalance(address, currentChainId);
-  const { executePaidRequest, loading: paymentLoading, error: paymentError } = useX402Payment();
   const [codeSnippet, setCodeSnippet] = useState("");
   const [loading, setLoading] = useState(false);
-  const [auditResult, setAuditResult] = useState<string | null>(null);
+  const [auditResult, setAuditResult] = useState<AuditReport | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleAudit() {
-    if (!codeSnippet.trim() || loading || paymentLoading) return;
+    if (!codeSnippet.trim() || loading || paidLoading) return;
     setLoading(true);
     setAuditResult(null);
+    setError(null);
 
     try {
-      const data = await executePaidRequest<{ audit?: string }>(
-        "http://localhost:3001/api/code",
-        {
-          method: "POST",
-          body: JSON.stringify({ code: codeSnippet }),
-        }
-      );
-      if (data?.audit) {
-        setAuditResult(data.audit);
-        refetch();
-      } else {
-        setAuditResult("Audit Complete: No high-severity vulnerabilities detected in analyzed contract scope.");
+      const data = await runPaid<{ audit?: AuditReport }>({ code: codeSnippet });
+      if (!data?.audit) {
+        throw new Error("No audit verdict returned from the server");
       }
-    } catch {
-      setAuditResult("Audit Complete: Gemini 2.5 Flash scanned code snippet ($0.02 USDT). Zero critical exploits found.");
+      setAuditResult(data.audit);
+      refetch();
+    } catch (err: unknown) {
+      console.error("Audit error:", err);
+      setError(err instanceof Error ? err.message : "Audit failed");
     } finally {
       setLoading(false);
     }
   }
+
+  const busy = loading || paidLoading;
 
   return (
     <main className="flex flex-col min-h-screen max-w-md mx-auto bg-slate-950 text-slate-100 shadow-2xl border-x border-slate-800">
@@ -61,11 +77,15 @@ export default function CodePage() {
         currentChainId={currentChainId}
         isTestnet={isTestnet}
         onSwitchNetwork={(targetTestnet) => switchOrAddBotChain(targetTestnet)}
+        allowNetworkSwitch={allowNetworkSwitch}
       />
 
       <div className="p-4 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Link href="/" className="p-1.5 bg-slate-900 text-slate-400 hover:text-white rounded-lg border border-slate-800">
+          <Link
+            href="/"
+            className="p-1.5 bg-slate-900 text-slate-400 hover:text-white rounded-lg border border-slate-800"
+          >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="flex items-center space-x-2">
@@ -74,7 +94,7 @@ export default function CodePage() {
           </div>
         </div>
         <span className="text-xs font-bold bg-slate-900 text-emerald-400 px-2.5 py-1 rounded-lg border border-slate-800">
-          $0.02 USDT
+          $0.02 USDT / audit
         </span>
       </div>
 
@@ -85,9 +105,23 @@ export default function CodePage() {
             <span>AI Vulnerability & Optimization Scanner</span>
           </div>
           <p className="text-slate-400">
-            Paste Solidity or TypeScript code for automated security scanning. Costs $0.02 USDT per audit via BotChain.
+            Pay-per-prompt: each audit is a $0.02 USDT on-chain transfer. Confirm in your wallet for
+            every request.
           </p>
         </div>
+
+        {!authenticated || !address ? (
+          <div className="bg-purple-950/40 border border-purple-800/60 rounded-xl p-4 space-y-3 text-xs">
+            <p className="text-purple-100 font-medium">Connect a wallet to pay with USDT</p>
+            <button
+              onClick={() => connectWallet()}
+              className="w-full flex items-center justify-center space-x-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold py-2.5 rounded-xl transition"
+            >
+              <Wallet className="w-4 h-4" />
+              <span>Connect Wallet</span>
+            </button>
+          </div>
+        ) : null}
 
         {paymentError && (
           <div className="bg-rose-950/40 border border-rose-800 text-rose-300 rounded-xl p-3 text-xs">
@@ -95,34 +129,78 @@ export default function CodePage() {
           </div>
         )}
 
+        {error && (
+          <div className="bg-rose-950/40 border border-rose-800 text-rose-300 rounded-xl p-3 text-xs">
+            {error}
+          </div>
+        )}
+
         {auditResult && (
-          <div className="bg-slate-900 border border-amber-500/20 rounded-xl p-4 space-y-2 text-xs animate-fade-in">
-            <div className="flex items-center space-x-2 text-emerald-400 font-bold">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Audit Report Summary</span>
+          <div className="bg-slate-900 border border-amber-500/20 rounded-xl p-4 space-y-3 text-xs animate-fade-in">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 font-bold text-emerald-400">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Audit Report</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="font-mono font-bold text-amber-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                  {auditResult.score}
+                </span>
+                <span
+                  className={`font-semibold px-2 py-0.5 rounded border ${
+                    auditResult.vulnerabilities > 0
+                      ? "text-rose-300 bg-rose-950/50 border-rose-800"
+                      : "text-emerald-300 bg-emerald-950/50 border-emerald-800"
+                  }`}
+                >
+                  {auditResult.vulnerabilities}{" "}
+                  {auditResult.vulnerabilities === 1 ? "issue" : "issues"}
+                </span>
+              </div>
             </div>
-            <p className="text-slate-200 whitespace-pre-wrap leading-relaxed">
-              {auditResult}
-            </p>
+
+            {auditResult.summary && (
+              <p className="text-slate-200 whitespace-pre-wrap leading-relaxed">
+                {auditResult.summary}
+              </p>
+            )}
+
+            {auditResult.suggestions.length > 0 && (
+              <ul className="space-y-1.5 pt-1 border-t border-slate-800">
+                {auditResult.suggestions.map((suggestion, i) => (
+                  <li key={i} className="flex space-x-2 text-slate-300 leading-relaxed">
+                    <span className="text-amber-400 shrink-0">•</span>
+                    <span>{suggestion}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
       </div>
 
-      {/* Input Box */}
       <div className="p-4 border-t border-slate-900 bg-slate-950 space-y-2">
         <div className="relative">
           <textarea
             value={codeSnippet}
             onChange={(e) => setCodeSnippet(e.target.value)}
-            placeholder="Paste contract code or snippet here..."
+            placeholder={
+              authenticated && address
+                ? "Paste contract code or snippet here..."
+                : "Connect wallet to run a paid audit (USDT)…"
+            }
             className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 pr-12 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400/50 resize-none h-24 font-mono"
           />
           <button
             onClick={handleAudit}
-            disabled={loading || paymentLoading || !codeSnippet.trim()}
+            disabled={busy || !codeSnippet.trim()}
             className="absolute bottom-3 right-3 p-2 bg-amber-400 hover:bg-amber-300 disabled:bg-slate-800 text-slate-950 rounded-lg transition"
           >
-            {loading || paymentLoading ? <Loader2 className="w-4 h-4 animate-spin text-slate-400" /> : <Sparkles className="w-4 h-4" />}
+            {busy ? (
+              <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
           </button>
         </div>
       </div>

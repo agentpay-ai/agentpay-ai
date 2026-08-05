@@ -13,6 +13,15 @@ import { codeRoute } from "./routes/code.js";
 import { reputationRoute } from "./routes/reputation.js";
 import { attributionRoute } from "./routes/attribution.js";
 import { botChainRelayRoute } from "./routes/botchain-relay.js";
+import { createCreditsRoute } from "./routes/credits.js";
+import { getActiveModel } from "./lib/ai.js";
+import {
+  amountForPaidRoute,
+  PAYMENT_TX_HEADER,
+  verifyUsdtTransferPayment,
+} from "./lib/usdt-transfer-payment.js";
+import { trySessionPayment } from "./lib/session-payment.js";
+import { activity } from "./lib/activity-log.js";
 
 config();
 
@@ -21,32 +30,55 @@ const app = new Hono();
 app.use("*", cors());
 app.use("*", logger());
 
-const isMainnet = process.env.X402_NETWORK === "mainnet";
+const rawNetwork = process.env.X402_NETWORK ?? "testnet";
+if (rawNetwork !== "testnet" && rawNetwork !== "mainnet") {
+  console.error(`✗ X402_NETWORK must be "testnet" or "mainnet", received "${rawNetwork}"`);
+  process.exit(1);
+}
+if (!process.env.X402_NETWORK) {
+  console.warn('⚠️  X402_NETWORK is not set — defaulting to "testnet"');
+}
 
-// BotChain CAIP-2 Identifiers
+const isMainnet = rawNetwork === "mainnet";
+
 const botChainTestnetCaip = "eip155:968" as const;
 const botChainMainnetCaip = "eip155:677" as const;
 const activeBotChainCaip = isMainnet ? botChainMainnetCaip : botChainTestnetCaip;
+const activeChainId = isMainnet ? 677 : 968;
+const activeRpcUrl = isMainnet
+  ? process.env.BOTCHAIN_RPC_URL || "https://rpc.botchain.ai"
+  : process.env.BOTCHAIN_RPC_URL || "https://rpc.bohr.life";
 
-// Verified BotChain USDT Addresses (6 decimals)
-const usdtAddress = isMainnet
-  ? "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C" // Mainnet USDT
-  : "0x75edC9335175Fc0552D51D48439F229c10420fe3"; // Testnet USDT
+const usdtAddress = (
+  isMainnet
+    ? "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C"
+    : "0x75edC9335175Fc0552D51D48439F229c10420fe3"
+) as `0x${string}`;
 
-// Deployed AgentPayRegistry UUPS ERC1967 Proxy Vault Contract (BotChain Testnet)
-const defaultProxyVaultAddress = "0xc1eBB154EFf9bf9c08e39978E1447cC05e726dC6";
+const defaultProxyVaultAddress =
+  "0xc1eBB154EFf9bf9c08e39978E1447cC05e726dC6" as `0x${string}`;
 
 const payToAddress =
   (process.env.PAYMENT_RECIPIENT_ADDRESS as `0x${string}`) ||
   defaultProxyVaultAddress;
 
 const server = new x402ResourceServer(facilitator);
+server.register(activeBotChainCaip, new ExactEvmScheme());
 
-// Register schemes for all supported networks (BotChain EVM + Celo Fallbacks)
-server.register(botChainTestnetCaip, new ExactEvmScheme());
-server.register(botChainMainnetCaip, new ExactEvmScheme());
-server.register("eip155:42220", new ExactEvmScheme());
-server.register("eip155:11142220", new ExactEvmScheme());
+const extraNetworks = (process.env.X402_EXTRA_NETWORKS ?? "")
+  .split(",")
+  .map((n) => n.trim())
+  .filter(Boolean);
+for (const network of extraNetworks) {
+  server.register(network as `${string}:${string}`, new ExactEvmScheme());
+}
+
+const routePrices: Record<string, string> = {
+  "POST /api/chat": "10000",
+  "POST /api/image": "50000",
+  "POST /api/code": "20000",
+  "POST /api/botchain/relay": "10000",
+};
 
 const routes: RoutesConfig = {
   "POST /api/chat": {
@@ -55,7 +87,7 @@ const routes: RoutesConfig = {
       network: activeBotChainCaip,
       payTo: payToAddress,
       price: {
-        amount: "10000", // $0.01 USDT (6 decimals)
+        amount: routePrices["POST /api/chat"],
         asset: usdtAddress,
         extra: { name: "USDT", version: "1" },
       },
@@ -68,7 +100,7 @@ const routes: RoutesConfig = {
       network: activeBotChainCaip,
       payTo: payToAddress,
       price: {
-        amount: "50000", // $0.05 USDT (6 decimals)
+        amount: routePrices["POST /api/image"],
         asset: usdtAddress,
         extra: { name: "USDT", version: "1" },
       },
@@ -81,7 +113,7 @@ const routes: RoutesConfig = {
       network: activeBotChainCaip,
       payTo: payToAddress,
       price: {
-        amount: "20000", // $0.02 USDT (6 decimals)
+        amount: routePrices["POST /api/code"],
         asset: usdtAddress,
         extra: { name: "USDT", version: "1" },
       },
@@ -94,7 +126,7 @@ const routes: RoutesConfig = {
       network: activeBotChainCaip,
       payTo: payToAddress,
       price: {
-        amount: "10000", // $0.01 USDT (6 decimals)
+        amount: routePrices["POST /api/botchain/relay"],
         asset: usdtAddress,
         extra: { name: "USDT", version: "1" },
       },
@@ -103,15 +135,110 @@ const routes: RoutesConfig = {
   },
 };
 
-app.use("/api/*", paymentMiddleware(routes, server));
+const x402Payment = paymentMiddleware(routes, server);
+
+/**
+ * Payment gate (order matters):
+ *  1. Bearer session → debit prepaid ledger (seamless, no wallet popup)
+ *  2. X-AgentPay-Payment-Tx → verify on-chain one-shot USDT transfer
+ *  3. Else → x402 402 challenge
+ */
+app.use("/api/*", async (c, next) => {
+  const method = c.req.method.toUpperCase();
+  const pathname = new URL(c.req.url).pathname;
+  const requiredAmount = amountForPaidRoute(method, pathname, routePrices);
+
+  if (requiredAmount === null) {
+    return next();
+  }
+
+  // 1) Prepaid session
+  const auth = c.req.header("authorization") || c.req.header("Authorization");
+  if (auth) {
+    try {
+      const paid = trySessionPayment(auth, requiredAmount, pathname);
+      if (paid) {
+        c.header("X-AgentPay-Charged", paid.chargedAtomic.toString());
+        c.header("X-AgentPay-Remaining", paid.remainingAtomic.toString());
+        return next();
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Session payment failed";
+      return c.json(
+        {
+          error: message,
+          paymentAsset: "USDT",
+          paymentMethod: "prepaid-session",
+          requiredAmount: requiredAmount.toString(),
+          network: activeBotChainCaip,
+          hint: "Deposit more USDT via /api/credits/deposit or pay with a one-shot transfer.",
+        },
+        402
+      );
+    }
+  }
+
+  // 2) One-shot on-chain USDT transfer proof
+  const txHash = c.req.header(PAYMENT_TX_HEADER) || c.req.header("X-AgentPay-Payment-Tx");
+  if (txHash) {
+    try {
+      const result = await verifyUsdtTransferPayment({
+        txHash,
+        usdtAddress,
+        payTo: payToAddress,
+        minAmountAtomic: requiredAmount,
+        chainId: activeChainId,
+        rpcUrl: activeRpcUrl,
+      });
+      activity("payment.transfer_ok", {
+        path: pathname,
+        txHash: result.txHash,
+        from: result.from,
+        amountAtomic: result.amount.toString(),
+      });
+      return next();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Invalid USDT payment transaction";
+      activity("payment.transfer_fail", { path: pathname, reason: message }, "warn");
+      return c.json(
+        {
+          error: message,
+          paymentAsset: "USDT",
+          payTo: payToAddress,
+          requiredAmount: requiredAmount.toString(),
+          network: activeBotChainCaip,
+        },
+        402
+      );
+    }
+  }
+
+  // 3) Challenge
+  activity("payment.challenge", {
+    path: pathname,
+    requiredAmount: requiredAmount.toString(),
+    network: activeBotChainCaip,
+  });
+  return x402Payment(c, next);
+});
 
 const healthHandler = (c: any) => {
   return c.json({
     status: "ok",
     service: "AgentPay AI API Gateway",
     timestamp: new Date().toISOString(),
-    aiProvider: "Anthropic Claude Haiku 4.5",
+    aiProvider: `Anthropic ${getActiveModel()}`,
+    model: getActiveModel(),
     network: activeBotChainCaip,
+    chainId: activeChainId,
+    usdtAsset: usdtAddress,
+    paymentAsset: "USDT",
+    paymentAssetOnly: true,
+    paymentMethods: ["prepaid-session", "usdt-transfer", "x402-exact"],
+    paymentTxHeader: "X-AgentPay-Payment-Tx",
+    sessionHeader: "Authorization: Bearer <sessionToken>",
+    creditsDeposit: "/api/credits/deposit",
+    rpcUrl: activeRpcUrl,
     supportedNetworks: [
       { name: "BotChain Testnet", caip2: botChainTestnetCaip, chainId: 968 },
       { name: "BotChain Mainnet", caip2: botChainMainnetCaip, chainId: 677 },
@@ -125,6 +252,16 @@ const healthHandler = (c: any) => {
 app.get("/health", healthHandler);
 app.get("/api/health", healthHandler);
 
+app.route(
+  "/api",
+  createCreditsRoute({
+    usdtAddress,
+    payTo: payToAddress,
+    chainId: activeChainId,
+    rpcUrl: activeRpcUrl,
+    network: activeBotChainCaip,
+  })
+);
 app.route("/api", chatRoute);
 app.route("/api", imageRoute);
 app.route("/api", codeRoute);
@@ -134,12 +271,25 @@ app.route("/api", botChainRelayRoute);
 
 const port = Number(process.env.PORT) || 3001;
 
+activity("server.start", {
+  port,
+  network: activeBotChainCaip,
+  chainId: activeChainId,
+  usdt: usdtAddress,
+  vault: payToAddress,
+  model: getActiveModel(),
+  hasAnthropicKey: Boolean(process.env.ANTHROPIC_API_KEY),
+});
+
 console.log(`🤖 AgentPay AI Gateway starting on port ${port}...`);
-console.log(`   Network:     ${activeBotChainCaip} (${isMainnet ? "MAINNET" : "TESTNET"})`);
-console.log(`   AI Provider: Anthropic Claude Haiku 4.5 ${process.env.ANTHROPIC_API_KEY ? "✅ key loaded" : "⚠️  no key (fallback mode)"}`);
-console.log(`   Vault:       ${payToAddress}`);
-console.log(`   USDT Asset:  ${usdtAddress}`);
-console.log(`   Routes:      /api/chat, /api/image, /api/code, /api/botchain/relay`);
+console.log(`   🌐 Network:     ${activeBotChainCaip} (${isMainnet ? "MAINNET ⚠️" : "TESTNET"})`);
+console.log(`   Chain ID:   ${activeChainId}`);
+console.log(`   💰 USDT:       ${usdtAddress}`);
+console.log(`   🤖 AI:         Anthropic ${getActiveModel()} ${process.env.ANTHROPIC_API_KEY ? "✅" : "⚠️  no key"}`);
+console.log(`   🏦 Vault:      ${payToAddress}`);
+console.log(`   🔗 RPC:        ${activeRpcUrl}`);
+console.log(`   💳 Pay path:   prepaid session → one-shot USDT tx → x402 402`);
+console.log(`   📍 Routes:     /api/chat, /api/image, /api/code, /api/credits, /api/botchain/relay`);
 
 serve({
   fetch: app.fetch,

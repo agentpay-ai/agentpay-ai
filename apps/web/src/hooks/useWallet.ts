@@ -3,31 +3,53 @@
 import { useCallback } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 
-interface EthereumProvider {
-  request?: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+export interface EthereumProvider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
   isMiniPay?: boolean;
 }
 
-function getEthereum(): EthereumProvider | undefined {
+function getInjectedEthereum(): EthereumProvider | undefined {
   if (typeof window === "undefined") return undefined;
-  return window.ethereum as unknown as EthereumProvider | undefined;
+  const eth = window.ethereum as unknown as EthereumProvider | undefined;
+  return eth?.request ? eth : undefined;
 }
 
 export function isMiniPay(): boolean {
-  return getEthereum()?.isMiniPay === true;
+  return getInjectedEthereum()?.isMiniPay === true;
 }
 
 export function hasEVMWallet(): boolean {
-  return Boolean(getEthereum());
+  return Boolean(getInjectedEthereum());
 }
 
 export function useWallet() {
   const { login, logout, authenticated, ready, user } = usePrivy();
   const { wallets } = useWallets();
 
-  const primaryWallet = wallets[0];
+  // Prefer an external wallet (MetaMask / MiniPay) over embedded when both exist.
+  const primaryWallet =
+    wallets.find((w) => w.walletClientType !== "privy") || wallets[0];
   // Only expose wallet address when Privy session is authenticated
   const address = authenticated ? (primaryWallet?.address || user?.wallet?.address || null) : null;
+
+  /**
+   * EIP-1193 provider for the active Privy wallet, falling back to window.ethereum.
+   * Payment must use this — bare window.ethereum often points at a different wallet
+   * than the one Privy authenticated, which causes eth_requestAccounts to hang.
+   */
+  const getProvider = useCallback(async (): Promise<EthereumProvider | undefined> => {
+    if (primaryWallet) {
+      try {
+        const provider = (await primaryWallet.getEthereumProvider()) as EthereumProvider | null;
+        if (provider && typeof provider.request === "function") {
+          return provider;
+        }
+      } catch (err) {
+        console.warn("[wallet] Privy getEthereumProvider failed:", err);
+      }
+    }
+    return getInjectedEthereum();
+  }, [primaryWallet]);
 
   const disconnectWallet = useCallback(async () => {
     try {
@@ -114,8 +136,8 @@ export function useWallet() {
         }
       }
 
-      // 2. Direct fallback to window.ethereum
-      const eth = getEthereum();
+      // 2. Direct fallback to injected provider
+      const eth = getInjectedEthereum();
       if (eth?.request) {
         try {
           await eth.request({
@@ -155,6 +177,7 @@ export function useWallet() {
     ready,
     user,
     wallets,
+    primaryWallet,
     currentChainId,
     isTestnet,
     currentChainName,
@@ -164,5 +187,6 @@ export function useWallet() {
     connectWallet,
     disconnectWallet,
     switchOrAddBotChain,
+    getProvider,
   };
 }

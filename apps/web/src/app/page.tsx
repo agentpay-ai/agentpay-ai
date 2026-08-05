@@ -72,7 +72,7 @@ export default function Home() {
             BotChain Autonomous AI
           </h1>
           <p className="text-slate-400 text-sm leading-relaxed">
-            Pay-per-prompt AI access hub on BotChain EVM for text completions, image generation, and code security audits. Sub-cent micro-transactions with zero subscriptions.
+            Pay-per-prompt AI access hub on BotChain EVM for text completions, image generation, and code security audits. Sub-cent USDT micro-transactions only — no subscriptions, no native BOT charged as payment.
           </p>
 
           {!address ? (

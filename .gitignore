@@ -14,6 +14,8 @@ node_modules/
 PLAN.md
 MILESTONE.md
 CONVERSATION.md
+Conver.md
+
 .superstack/
 
 # Next.js build output
@@ -23,6 +25,10 @@ out/
 # Hono / Node build output
 dist/
 build/
+
+# Prepaid credit ledger (local runtime state)
+apps/api/.data/
+.data/
 
 # Foundry / Solidity output
 contracts/out/

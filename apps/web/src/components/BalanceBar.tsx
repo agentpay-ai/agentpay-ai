@@ -8,12 +8,20 @@ interface BalanceBarProps {
   botBalance: string;
   usdtBalance?: string;
   bousdtBalance?: string;
+  /** Pre-authorized USDT spending budget remaining (formatted, e.g. "$1.00 USDT"). */
+  spendingBudget?: string | null;
   loading: boolean;
   onRefresh: () => void;
   onDisconnect?: () => void;
   currentChainId?: number;
   isTestnet?: boolean;
   onSwitchNetwork?: (isTestnet: boolean) => void;
+  /**
+   * Whether to offer the network switcher. Defaults to false so a caller that forgets to pass
+   * it fails closed — a missing switcher in dev is obvious and harmless, whereas an unintended
+   * switcher in production is silent and wrong.
+   */
+  allowNetworkSwitch?: boolean;
 }
 
 export function BalanceBar({
@@ -21,11 +29,13 @@ export function BalanceBar({
   botBalance,
   usdtBalance = "0.00",
   bousdtBalance = "0.00",
+  spendingBudget = null,
   loading,
   onRefresh,
   onDisconnect,
   isTestnet = true,
   onSwitchNetwork,
+  allowNetworkSwitch = false,
 }: BalanceBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -76,24 +86,39 @@ export function BalanceBar({
           )}
         </div>
 
-        {/* Network Switcher Dropdown */}
+        {/* Network indicator — interactive only where switching is permitted */}
         <div className="relative">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="flex items-center space-x-1.5 bg-purple-950/70 hover:bg-purple-900 px-2.5 py-1 rounded-full border border-purple-700/50 text-[11px] font-semibold text-purple-200 transition cursor-pointer shadow-sm"
-            title="Switch BotChain Network (Testnet / Mainnet)"
-          >
-            <span
-              className={`w-2 h-2 rounded-full ${
-                isTestnet ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
-              }`}
-            />
-            <Cpu className="w-3 h-3 text-purple-300" />
-            <span>{isTestnet ? "BotChain Testnet (968)" : "BotChain Mainnet (677)"}</span>
-            <ChevronDown className="w-3 h-3 text-purple-400" />
-          </button>
+          {allowNetworkSwitch ? (
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="flex items-center space-x-1.5 bg-purple-950/70 hover:bg-purple-900 px-2.5 py-1 rounded-full border border-purple-700/50 text-[11px] font-semibold text-purple-200 transition cursor-pointer shadow-sm"
+              title="Switch BotChain Network (Testnet / Mainnet)"
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  isTestnet ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
+                }`}
+              />
+              <Cpu className="w-3 h-3 text-purple-300" />
+              <span>{isTestnet ? "BotChain Testnet (968)" : "BotChain Mainnet (677)"}</span>
+              <ChevronDown className="w-3 h-3 text-purple-400" />
+            </button>
+          ) : (
+            <div
+              className="flex items-center space-x-1.5 bg-purple-950/70 px-2.5 py-1 rounded-full border border-purple-700/50 text-[11px] font-semibold text-purple-200 shadow-sm"
+              title="Active BotChain network"
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  isTestnet ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
+                }`}
+              />
+              <Cpu className="w-3 h-3 text-purple-300" />
+              <span>{isTestnet ? "BotChain Testnet (968)" : "BotChain Mainnet (677)"}</span>
+            </div>
+          )}
 
-          {menuOpen && (
+          {menuOpen && allowNetworkSwitch && (
             <div className="absolute right-0 mt-1.5 w-52 bg-slate-900 border border-purple-800/60 rounded-xl shadow-xl z-50 p-1 space-y-1">
               <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-slate-800">
                 Select Network
@@ -139,18 +164,27 @@ export function BalanceBar({
 
       <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 overflow-x-auto no-scrollbar">
         <div className="flex items-center space-x-1.5 shrink-0">
-          <div className="flex items-center space-x-1 bg-purple-900/40 px-2 py-0.5 rounded-full border border-purple-700/50">
-            <Coins className="w-3 h-3 text-purple-400" />
-            <span className="font-semibold text-purple-300 text-[11px]">
-              {botBalance} BOT
-            </span>
-          </div>
-
-          <div className="flex items-center space-x-1 bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-800/60">
+          {/* USDT is the only payment asset — surface it first */}
+          <div
+            className="flex items-center space-x-1 bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-800/60"
+            title="Wallet USDT balance — the only asset charged for AI tools"
+          >
+            <Coins className="w-3 h-3 text-emerald-400" />
             <span className="font-semibold text-emerald-300 text-[11px]">
               ${usdtBalance} USDT
             </span>
           </div>
+
+          {spendingBudget && (
+            <div
+              className="flex items-center space-x-1 bg-amber-950/50 px-2 py-0.5 rounded-full border border-amber-700/50"
+              title="Pre-authorized USDT spending budget for AgentPay tools"
+            >
+              <span className="font-semibold text-amber-300 text-[11px]">
+                Budget {spendingBudget}
+              </span>
+            </div>
+          )}
 
           {!isTestnet && (
             <div className="flex items-center space-x-1 bg-teal-950/50 px-2 py-0.5 rounded-full border border-teal-800/60">
@@ -160,9 +194,18 @@ export function BalanceBar({
             </div>
           )}
 
-          <div className="flex items-center space-x-1 bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-700/50 text-[10px] text-amber-300 font-mono" title="x402 Micropayments settle directly into the UUPS Upgradeable AgentPayRegistry Proxy Contract Vault">
+          <div
+            className="flex items-center space-x-1 bg-slate-800/60 px-2 py-0.5 rounded-full border border-slate-700/50"
+            title="Native BOT for network fees only — never charged as payment"
+          >
+            <span className="font-semibold text-slate-400 text-[11px]">
+              {botBalance} BOT fee
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-1 bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-700/50 text-[10px] text-amber-300 font-mono" title="x402 Micropayments settle USDT into the AgentPayRegistry Proxy Vault">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            <span>Vault: AgentPayRegistry</span>
+            <span>Pay: USDT only</span>
           </div>
         </div>
 
