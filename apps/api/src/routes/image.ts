@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { enhanceImagePrompt } from "../lib/gemini.js";
+import { enhanceImagePrompt } from "../lib/ai.js";
 
 export const imageRoute = new Hono();
 
@@ -14,7 +14,7 @@ imageRoute.post("/image", async (c) => {
     rawPrompt,
     enhancedPrompt,
     imageUrl: `https://placehold.co/512x512/0f172a/f59e0b?text=${encodeURIComponent(rawPrompt)}`,
-    model: "gemini-2.5-flash",
+    model: "claude-haiku-4.5",
     timestamp: new Date().toISOString(),
   });
 });

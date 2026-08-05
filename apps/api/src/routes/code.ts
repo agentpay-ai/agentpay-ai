@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { auditCodeSnippet } from "../lib/gemini.js";
+import { auditCodeSnippet } from "../lib/ai.js";
 
 export const codeRoute = new Hono();
 
@@ -12,7 +12,7 @@ codeRoute.post("/code", async (c) => {
     success: true,
     tool: "code",
     audit,
-    model: "gemini-2.5-flash",
+    model: "claude-haiku-4.5",
     timestamp: new Date().toISOString(),
   });
 });

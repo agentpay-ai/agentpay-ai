@@ -54,7 +54,7 @@ export default function ChatPage() {
         }
       );
 
-      const aiText = data?.response || `[AgentPay AI Response] Processed prompt: "${userPrompt}". Powered by Google Gemini 1.5 Flash.`;
+      const aiText = data?.response || `[AgentPay AI Response] Processed prompt: "${userPrompt}". Powered by Anthropic Claude.`;
       const aiMsg: MessageItem = {
         id: `ai-${Date.now()}`,
         sender: "ai",
@@ -112,7 +112,7 @@ export default function ChatPage() {
         <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs">
           <div className="flex items-center space-x-1.5 text-amber-400 font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Google Gemini 1.5 Flash Powered</span>
+            <span>Anthropic Claude AI Powered</span>
           </div>
           <p className="text-slate-400">
             Ask any question, generate text, summaries, or translations. Each prompt costs $0.01 USDT via x402 on BotChain.
@@ -141,7 +141,7 @@ export default function ChatPage() {
               ) : (
                 <>
                   <Bot className="w-3 h-3 text-amber-400" />
-                  <span>Gemini 1.5 Flash</span>
+                  <span>Claude Haiku</span>
                 </>
               )}
               <span>•</span>

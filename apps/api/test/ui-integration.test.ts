@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { generateChatResponse, enhanceImagePrompt, auditCodeSnippet } from "../src/lib/gemini.js";
+import { generateChatResponse, enhanceImagePrompt, auditCodeSnippet } from "../src/lib/ai.js";
 import { appendAttributionTag, verifyAttributionTag } from "../src/lib/attribution.js";
 
 test("UI & Tool Workflows - Chat prompt payload generates valid text response", async () => {
