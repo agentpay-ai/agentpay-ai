@@ -12,36 +12,36 @@ export function getEnvironment(): AppEnvironment {
 }
 
 /**
- * Base URL for the Hono API.
+ * Base URL for the Hono API used by browser `fetch`.
  *
- * In the browser, prefer same-origin relative URLs whenever the configured API is local.
- * Next.js rewrites `/api/*` → the backend (see next.config.ts), which:
- *  - always produces a visible network request from the page origin
- *  - avoids CORS preflight failures that can make it look like "nothing was sent"
- *  - works even when the API is only reachable via the Next proxy
+ * In the browser we always use same-origin relative URLs (`""` → `/api/...`).
+ * Next.js rewrites proxy those to the real gateway (NEXT_PUBLIC_API_URL / API_URL).
  *
- * Absolute URLs are still used for non-local deployments and for server-side code.
+ * Why not call the API host directly from the browser?
+ * Cross-origin responses hide non-CORS-safelisted headers (including x402's
+ * `payment-required`) unless Access-Control-Expose-Headers is set. Same-origin
+ * rewrites avoid that class of bug entirely.
+ *
+ * Server-side (SSR / rewrites config) still needs the absolute gateway origin.
  */
 export function getApiUrl(): string {
-  const configured = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-
   if (typeof window !== "undefined") {
-    try {
-      const url = new URL(configured, window.location.origin);
-      const host = url.hostname;
-      const isLocal =
-        host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "";
-      if (isLocal) {
-        // Same-origin → Next rewrite. Paths like `/api/chat` hit the gateway.
-        return "";
-      }
-      return configured.replace(/\/$/, "");
-    } catch {
-      return "";
-    }
+    return "";
   }
 
+  const configured = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:3001";
   return configured.replace(/\/$/, "");
+}
+
+/**
+ * Absolute API origin for tooling that cannot use relative URLs.
+ * Prefer getApiUrl() in browser code.
+ */
+export function getAbsoluteApiUrl(): string {
+  return (process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:3001").replace(
+    /\/$/,
+    ""
+  );
 }
 
 /**

@@ -15,6 +15,7 @@ PLAN.md
 MILESTONE.md
 CONVERSATION.md
 Conver.md
+# CON01.md
 
 .superstack/
 
@@ -47,3 +48,7 @@ yarn-debug.log*
 yarn-error.log*
 logs/
 *.log
+
+.vercel
+apps/*/.vercel
+apps/*/.env.local

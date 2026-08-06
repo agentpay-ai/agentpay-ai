@@ -73,6 +73,10 @@ export function _resetSpentTxHashesForTests(): void {
 /**
  * Verify an on-chain USDT transfer pays at least `minAmountAtomic` to `payTo`.
  * Throws a user-facing Error on failure.
+ *
+ * Does NOT mark the tx as spent — call `consumePaymentTx` only after the
+ * paid handler returns success. Otherwise a timed-out AI call burns a valid
+ * payment and retries return 402 "already used".
  */
 export async function verifyUsdtTransferPayment(
   params: VerifyTransferParams
@@ -106,7 +110,7 @@ export async function verifyUsdtTransferPayment(
   const usdt = params.usdtAddress.toLowerCase();
   const payTo = params.payTo.toLowerCase();
 
-  let totalToVault = 0n;
+  let totalToVault = BigInt(0);
   let from: `0x${string}` | null = null;
 
   for (const log of receipt.logs as Log[]) {
@@ -134,14 +138,17 @@ export async function verifyUsdtTransferPayment(
     );
   }
 
-  markSpent(txHash);
-
   return {
     from: from ?? ("0x0000000000000000000000000000000000000000" as `0x${string}`),
     to: params.payTo,
     amount: totalToVault,
     txHash,
   };
+}
+
+/** Mark a verified payment tx as consumed after a successful paid response. */
+export function consumePaymentTx(txHash: string): void {
+  markSpent(normalizeTxHash(txHash));
 }
 
 /** Map request method+path to the required atomic USDT amount. */

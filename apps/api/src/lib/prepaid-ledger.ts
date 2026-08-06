@@ -13,12 +13,9 @@ import { fileURLToPath } from "node:url";
 const balances = new Map<string, bigint>();
 const creditedDeposits = new Set<string>();
 
-const DATA_DIR = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  ".data"
-);
+const DATA_DIR = process.env.VERCEL
+  ? join("/tmp", "agentpay-data")
+  : join(dirname(fileURLToPath(import.meta.url)), "..", "..", ".data");
 const LEDGER_PATH = join(DATA_DIR, "prepaid-ledger.json");
 
 function norm(addr: string): string {

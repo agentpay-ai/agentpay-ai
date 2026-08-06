@@ -10,6 +10,7 @@ export type ActivityEvent =
   | "payment.challenge"
   | "payment.transfer_ok"
   | "payment.transfer_fail"
+  | "payment.consumed"
   | "payment.prepaid_ok"
   | "payment.prepaid_fail"
   | "payment.session_ok"
@@ -22,7 +23,17 @@ export type ActivityEvent =
   | "ai.code"
   | "ai.error"
   | "request.reject"
-  | "relay.dispatch";
+  | "relay.dispatch"
+  | "captcha.trigger"
+  | "captcha.trigger_error"
+  | "captcha.challenge_served"
+  | "captcha.proxy"
+  | "captcha.proxy_error"
+  | "captcha.verified"
+  | "captcha.verify_check"
+  | "captcha.verify_ok"
+  | "captcha.verify_failed"
+  | "captcha.verify_error";
 
 export interface ActivityFields {
   [key: string]: string | number | boolean | null | undefined;
