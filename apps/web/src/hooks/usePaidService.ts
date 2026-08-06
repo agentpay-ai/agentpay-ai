@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useWallet } from "@/hooks/useWallet";
-import { useX402Payment } from "@/hooks/useX402Payment";
+import { useX402Payment, CaptchaRequiredError } from "@/hooks/useX402Payment";
 import { SERVICE_PRICES, ServiceKey } from "@/lib/pricing";
 import { getApiUrl } from "@/lib/environment";
 
@@ -33,10 +33,12 @@ export function usePaidService(service: ServiceKey) {
   } = useX402Payment();
 
   const [settling, setSettling] = useState(false);
+  const [captchaHtml, setCaptchaHtml] = useState<string | null>(null);
 
   const runPaid = useCallback(
     async <T = unknown>(body: unknown): Promise<T> => {
       clearError();
+      setCaptchaHtml(null);
 
       if (ready && (!authenticated || !address)) {
         try {
@@ -79,6 +81,12 @@ export function usePaidService(service: ServiceKey) {
             switchChain,
           }
         )) as T;
+      } catch (err: unknown) {
+        if (err instanceof CaptchaRequiredError) {
+          console.warn("[agentpay] WAF captcha challenge received, displaying captcha modal");
+          setCaptchaHtml(err.captchaHtml);
+        }
+        throw err;
       } finally {
         setSettling(false);
       }
@@ -113,6 +121,8 @@ export function usePaidService(service: ServiceKey) {
     error: paymentError,
     clearError,
     txHash,
+    captchaHtml,
+    clearCaptcha: () => setCaptchaHtml(null),
     // Kept for page compatibility; no prepaid modal in this mode.
     modalOpen: false,
     closeModal: () => {},

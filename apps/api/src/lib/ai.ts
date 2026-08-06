@@ -18,7 +18,7 @@ export type AIErrorType =
 
 export type AIResult =
   | { ok: true; text: string; model: string; inputTokens: number; outputTokens: number; truncated: boolean }
-  | { ok: false; errorType: AIErrorType; error: string };
+  | { ok: false; errorType: AIErrorType; error: string; isCaptcha?: boolean; captchaHtml?: string };
 
 /** Resolved model id, exported so routes and /health report what is actually in use. */
 export function getActiveModel(): string {
@@ -116,6 +116,13 @@ export class AIGatewayError extends Error {
   }
 }
 
+export class AIGatewayCaptchaError extends Error {
+  constructor(message: string, readonly captchaHtml: string) {
+    super(message);
+    this.name = "AIGatewayCaptchaError";
+  }
+}
+
 export interface NormalizedResponse {
   text: string;
   inputTokens: number;
@@ -140,16 +147,16 @@ export function normalizeAnthropicResponse(rawResponse: unknown): NormalizedResp
     try {
       resObj = JSON.parse(resObj);
     } catch {
-      // If the unparseable string is HTML (e.g., Aliyun WAF captcha challenge), throw gateway error
+      // If the unparseable string is HTML (e.g., Aliyun WAF captcha challenge), throw captcha error
       if (
         typeof resObj === "string" &&
         (resObj.trim().toLowerCase().startsWith("<!doctype") ||
           resObj.toLowerCase().includes("<html") ||
           resObj.includes("aliyunwaf"))
       ) {
-        throw new AIGatewayError(
+        throw new AIGatewayCaptchaError(
           "Upstream API gateway returned an Aliyun WAF captcha challenge instead of an AI response",
-          "network"
+          resObj
         );
       }
       // Not JSON — a bare string body is the model's text.
@@ -236,6 +243,18 @@ async function runCompletion(
     return { ok: true, text, model, inputTokens, outputTokens, truncated };
   } catch (err: any) {
     const durationMs = Date.now() - start;
+
+    if (err instanceof AIGatewayCaptchaError) {
+      console.warn(`[AI] ⚠️  ${label} encountered WAF captcha challenge in ${durationMs}ms with ${model}`);
+      return {
+        ok: false,
+        errorType: "network",
+        error: err.message,
+        isCaptcha: true,
+        captchaHtml: err.captchaHtml,
+      };
+    }
+
     const errorType: AIErrorType = err instanceof AIGatewayError ? err.errorType : classifyError(err);
     const error = err?.message || String(err);
 

@@ -6,6 +6,7 @@ import { useBalance } from "@/hooks/useBalance";
 import { usePaidService } from "@/hooks/usePaidService";
 import { useCanSwitchNetwork } from "@/hooks/useCanSwitchNetwork";
 import { BalanceBar } from "@/components/BalanceBar";
+import { CaptchaModal } from "@/components/CaptchaModal";
 import { Image as ImageIcon, Sparkles, Loader2, ArrowLeft, Download, Wallet } from "lucide-react";
 import Link from "next/link";
 
@@ -21,6 +22,8 @@ export default function ImagePage() {
     runPaid,
     loading: paidLoading,
     error: paymentError,
+    captchaHtml,
+    clearCaptcha,
   } = usePaidService("image");
   const {
     botBalance,
@@ -175,6 +178,7 @@ export default function ImagePage() {
           </button>
         </div>
       </div>
+      <CaptchaModal captchaHtml={captchaHtml} onClose={clearCaptcha} />
     </main>
   );
 }

@@ -22,18 +22,30 @@ codeRoute.post("/code", async (c) => {
   // An audit that could not run must never report a passing grade.
   if (!result.ok) {
     const status = aiErrorStatus(result.errorType);
+    const isCaptcha = (result as any).isCaptcha ?? false;
+    const captchaHtml = (result as any).captchaHtml;
     activity(
       "ai.error",
-      { tool: "code", errorType: result.errorType, status, details: result.error },
+      {
+        tool: "code",
+        errorType: result.errorType,
+        status,
+        details: result.error,
+        isCaptcha,
+      },
       "error"
     );
     return c.json(
       {
         success: false,
         tool: "code",
-        error: "Code audit unavailable — no verdict was produced",
+        error: isCaptcha ? "Security Verification Required" : "Code audit unavailable — no verdict was produced",
         errorType: result.errorType,
-        hint: aiErrorHint(result.errorType),
+        isCaptcha,
+        captchaHtml,
+        hint: isCaptcha
+          ? "Please complete the CAPTCHA verification to proceed"
+          : aiErrorHint(result.errorType),
         details: result.error,
         timestamp: new Date().toISOString(),
       },

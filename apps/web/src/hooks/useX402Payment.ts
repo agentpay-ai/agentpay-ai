@@ -135,17 +135,47 @@ async function errorFromResponse(response: Response): Promise<string> {
 }
 
 function decodePaymentRequired(response: Response): PaymentAccept | null {
-  const raw =
-    response.headers.get("payment-required") ||
-    response.headers.get("PAYMENT-REQUIRED") ||
-    response.headers.get("Payment-Required");
-  if (!raw) return null;
+  // Header names are case-insensitive in Fetch, but some proxies rename them.
+  const candidates = [
+    "payment-required",
+    "Payment-Required",
+    "PAYMENT-REQUIRED",
+    "x-payment-required",
+  ];
+  let raw: string | null = null;
+  for (const name of candidates) {
+    raw = response.headers.get(name);
+    if (raw) break;
+  }
+
+  // Fallback: scan all exposed headers (helps when casing/proxy differs).
+  if (!raw) {
+    try {
+      response.headers.forEach((value, key) => {
+        if (!raw && key.toLowerCase().includes("payment-required")) {
+          raw = value;
+        }
+      });
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (!raw) {
+    console.warn(
+      "[agentpay] 402 without readable payment-required header. " +
+        "If this is a cross-origin call, the API must set Access-Control-Expose-Headers. " +
+        "Prefer same-origin /api/* via Next rewrites."
+    );
+    return null;
+  }
 
   try {
     const pad = "=".repeat((4 - (raw.length % 4)) % 4);
     const json = JSON.parse(atob(raw + pad)) as { accepts?: PaymentAccept[] };
     const accept = json.accepts?.[0];
     if (!accept?.asset || !accept?.payTo || !accept?.amount || !accept?.network) {
+      console.warn("[agentpay] payment-required missing required fields", json);
       return null;
     }
     return accept;
@@ -384,6 +414,41 @@ async function payExactUsdtTransfer(
   return hash;
 }
 
+export class CaptchaRequiredError extends Error {
+  constructor(message: string, readonly captchaHtml: string) {
+    super(message);
+    this.name = "CaptchaRequiredError";
+  }
+}
+
+async function parseResponseOrThrow<T>(res: Response): Promise<T> {
+  const text = await res.text().catch(() => "");
+  let json: any = null;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    /* ignore */
+  }
+
+  if (!res.ok) {
+    if (json?.isCaptcha && typeof json?.captchaHtml === "string") {
+      throw new CaptchaRequiredError(
+        json.error || "Security verification required",
+        json.captchaHtml
+      );
+    }
+    const message =
+      (typeof json?.error === "string" && json.error) ||
+      (typeof json?.details === "string" && json.details) ||
+      (typeof json?.message === "string" && json.message) ||
+      text.slice(0, 200) ||
+      res.statusText;
+    throw new Error(message);
+  }
+
+  return (json ?? text) as T;
+}
+
 export function useX402Payment() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -413,8 +478,7 @@ export function useX402Payment() {
       console.info("[agentpay] probe ←", probe.status, url);
 
       if (probe.status !== 402) {
-        if (!probe.ok) throw new Error(await errorFromResponse(probe));
-        return (await probe.json()) as T;
+        return await parseResponseOrThrow<T>(probe);
       }
 
       const accept = decodePaymentRequired(probe);
@@ -440,10 +504,7 @@ export function useX402Payment() {
       );
       console.info("[agentpay] paid ←", paid.status, url, "tx=", hash);
 
-      if (!paid.ok) {
-        throw new Error(await errorFromResponse(paid));
-      }
-      return (await paid.json()) as T;
+      return await parseResponseOrThrow<T>(paid);
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "Payment execution failed";
       console.error("[agentpay] request failed:", errMsg);
