@@ -12,7 +12,6 @@ import { codeRoute } from "./routes/code.js";
 import { reputationRoute } from "./routes/reputation.js";
 import { attributionRoute } from "./routes/attribution.js";
 import { botChainRelayRoute } from "./routes/botchain-relay.js";
-import { captchaRoute } from "./routes/captcha.js";
 import { createCreditsRoute } from "./routes/credits.js";
 import { getActiveModel } from "./lib/ai.js";
 import {
@@ -315,7 +314,6 @@ app.route("/api", codeRoute);
 app.route("/api", reputationRoute);
 app.route("/api", attributionRoute);
 app.route("/api", botChainRelayRoute);
-app.route("/api", captchaRoute);
 
 export { app };
 export default app;

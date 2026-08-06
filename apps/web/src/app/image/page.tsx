@@ -6,7 +6,6 @@ import { useBalance } from "@/hooks/useBalance";
 import { usePaidService } from "@/hooks/usePaidService";
 import { useCanSwitchNetwork } from "@/hooks/useCanSwitchNetwork";
 import { BalanceBar } from "@/components/BalanceBar";
-import { CaptchaModal } from "@/components/CaptchaModal";
 import { Image as ImageIcon, Sparkles, Loader2, ArrowLeft, Download, Wallet } from "lucide-react";
 import Link from "next/link";
 
@@ -22,8 +21,6 @@ export default function ImagePage() {
     runPaid,
     loading: paidLoading,
     error: paymentError,
-    captchaHtml,
-    clearCaptcha,
   } = usePaidService("image");
   const {
     botBalance,
@@ -51,10 +48,6 @@ export default function ImagePage() {
       setImageUrl(data.imageUrl);
       refetch();
     } catch (err: unknown) {
-      if ((err as any)?.name === "CaptchaRequiredError" || (err as any)?.isCaptcha) {
-        console.info("[image] Captcha required — modal opened");
-        return;
-      }
       console.error("Image generation error:", err);
       setError(err instanceof Error ? err.message : "Image generation failed");
     } finally {
@@ -182,7 +175,6 @@ export default function ImagePage() {
           </button>
         </div>
       </div>
-      <CaptchaModal captchaHtml={captchaHtml} onClose={clearCaptcha} />
     </main>
   );
 }

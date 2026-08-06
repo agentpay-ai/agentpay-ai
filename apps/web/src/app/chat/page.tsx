@@ -7,7 +7,6 @@ import { usePaidService } from "@/hooks/usePaidService";
 import { useCanSwitchNetwork } from "@/hooks/useCanSwitchNetwork";
 import { BalanceBar } from "@/components/BalanceBar";
 import { ChatMarkdown } from "@/components/ChatMarkdown";
-import { CaptchaModal } from "@/components/CaptchaModal";
 import { Bot, Send, Sparkles, Loader2, ArrowLeft, User, Wallet } from "lucide-react";
 import Link from "next/link";
 
@@ -31,8 +30,6 @@ export default function ChatPage() {
     runPaid,
     loading: paidLoading,
     error: paymentError,
-    captchaHtml,
-    clearCaptcha,
   } = usePaidService("chat");
   const {
     botBalance,
@@ -77,13 +74,6 @@ export default function ChatPage() {
       ]);
       refetch();
     } catch (err: unknown) {
-      if ((err as any)?.name === "CaptchaRequiredError" || (err as any)?.isCaptcha) {
-        console.info("[chat] Captcha required — modal opened, preserving user prompt");
-        setPrompt(userPrompt);
-        // Remove transient user message from list since request is waiting for captcha
-        setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
-        return;
-      }
       console.error("Chat error:", err);
       setMessages((prev) => [
         ...prev,
@@ -243,7 +233,6 @@ export default function ChatPage() {
           </button>
         </div>
       </div>
-      <CaptchaModal captchaHtml={captchaHtml} onClose={clearCaptcha} />
     </main>
   );
 }

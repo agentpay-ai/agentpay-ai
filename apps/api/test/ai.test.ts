@@ -122,13 +122,7 @@ test("normalize: a bare non-JSON string body is the model's text", () => {
   assert.equal(result.text, "plain text reply");
 });
 
-test("normalize: HTML WAF captcha challenge throws network error", () => {
-  const html = '<!doctype html><meta charset="UTF-8"><meta name="aliyunwafaa" content="ff926c7f07e45e2e487a29a6197d3460">';
-  assert.throws(
-    () => normalizeAnthropicResponse(html),
-    (err: unknown) => err instanceof AIGatewayError && /Aliyun WAF captcha/.test((err as Error).message)
-  );
-});
+
 
 test("normalize: a JSON scalar is rejected, not silently emptied", () => {
   assert.throws(

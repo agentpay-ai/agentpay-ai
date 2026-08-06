@@ -23,26 +23,16 @@ chatRoute.post("/chat", async (c) => {
     const status = aiErrorStatus(result.errorType);
     activity(
       "ai.error",
-      {
-        tool: "chat",
-        errorType: result.errorType,
-        status,
-        details: result.error,
-        isCaptcha: result.isCaptcha ?? false,
-      },
+      { tool: "chat", errorType: result.errorType, status, details: result.error },
       "error"
     );
     return c.json(
       {
         success: false,
         tool: "chat",
-        error: result.isCaptcha ? "Security Verification Required" : "AI response unavailable",
+        error: "AI response unavailable",
         errorType: result.errorType,
-        isCaptcha: result.isCaptcha ?? false,
-        captchaHtml: result.captchaHtml,
-        hint: result.isCaptcha
-          ? "Please complete the CAPTCHA verification to proceed"
-          : aiErrorHint(result.errorType),
+        hint: aiErrorHint(result.errorType),
         details: result.error,
         timestamp: new Date().toISOString(),
       },

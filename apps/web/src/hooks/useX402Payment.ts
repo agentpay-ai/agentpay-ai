@@ -414,13 +414,6 @@ async function payExactUsdtTransfer(
   return hash;
 }
 
-export class CaptchaRequiredError extends Error {
-  constructor(message: string, readonly captchaHtml: string) {
-    super(message);
-    this.name = "CaptchaRequiredError";
-  }
-}
-
 async function parseResponseOrThrow<T>(res: Response): Promise<T> {
   const text = await res.text().catch(() => "");
   let json: any = null;
@@ -431,12 +424,6 @@ async function parseResponseOrThrow<T>(res: Response): Promise<T> {
   }
 
   if (!res.ok) {
-    if (json?.isCaptcha && typeof json?.captchaHtml === "string") {
-      throw new CaptchaRequiredError(
-        json.error || "Security verification required",
-        json.captchaHtml
-      );
-    }
     const message =
       (typeof json?.error === "string" && json.error) ||
       (typeof json?.details === "string" && json.details) ||
@@ -504,10 +491,6 @@ export function useX402Payment() {
       );
       return await parseResponseOrThrow<T>(paid);
     } catch (err: unknown) {
-      if (err instanceof CaptchaRequiredError || (err as any)?.name === "CaptchaRequiredError") {
-        console.info("[agentpay] request requires captcha verification");
-        throw err;
-      }
       const errMsg = err instanceof Error ? err.message : "Payment execution failed";
       console.error("[agentpay] request failed:", errMsg);
       setError(errMsg);

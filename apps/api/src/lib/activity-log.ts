@@ -23,17 +23,7 @@ export type ActivityEvent =
   | "ai.code"
   | "ai.error"
   | "request.reject"
-  | "relay.dispatch"
-  | "captcha.trigger"
-  | "captcha.trigger_error"
-  | "captcha.challenge_served"
-  | "captcha.proxy"
-  | "captcha.proxy_error"
-  | "captcha.verified"
-  | "captcha.verify_check"
-  | "captcha.verify_ok"
-  | "captcha.verify_failed"
-  | "captcha.verify_error";
+  | "relay.dispatch";
 
 export interface ActivityFields {
   [key: string]: string | number | boolean | null | undefined;

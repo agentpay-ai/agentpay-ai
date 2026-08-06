@@ -6,7 +6,6 @@ import { useBalance } from "@/hooks/useBalance";
 import { usePaidService } from "@/hooks/usePaidService";
 import { useCanSwitchNetwork } from "@/hooks/useCanSwitchNetwork";
 import { BalanceBar } from "@/components/BalanceBar";
-import { CaptchaModal } from "@/components/CaptchaModal";
 import { Code, Sparkles, Loader2, ArrowLeft, ShieldCheck, Wallet } from "lucide-react";
 import Link from "next/link";
 
@@ -29,8 +28,6 @@ export default function CodePage() {
     runPaid,
     loading: paidLoading,
     error: paymentError,
-    captchaHtml,
-    clearCaptcha,
   } = usePaidService("code");
   const {
     botBalance,
@@ -58,10 +55,6 @@ export default function CodePage() {
       setAuditResult(data.audit);
       refetch();
     } catch (err: unknown) {
-      if ((err as any)?.name === "CaptchaRequiredError" || (err as any)?.isCaptcha) {
-        console.info("[code] Captcha required — modal opened");
-        return;
-      }
       console.error("Audit error:", err);
       setError(err instanceof Error ? err.message : "Audit failed");
     } finally {
@@ -211,7 +204,6 @@ export default function CodePage() {
           </button>
         </div>
       </div>
-      <CaptchaModal captchaHtml={captchaHtml} onClose={clearCaptcha} />
     </main>
   );
 }

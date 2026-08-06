@@ -18,7 +18,7 @@ export type AIErrorType =
 
 export type AIResult =
   | { ok: true; text: string; model: string; inputTokens: number; outputTokens: number; truncated: boolean }
-  | { ok: false; errorType: AIErrorType; error: string; isCaptcha?: boolean; captchaHtml?: string };
+  | { ok: false; errorType: AIErrorType; error: string };
 
 /** Resolved model id, exported so routes and /health report what is actually in use. */
 export function getActiveModel(): string {
@@ -44,79 +44,6 @@ let cachedClient: Anthropic | null = null;
 let cachedClientKey: string | null = null;
 
 /**
- * In-process WAF cookie jar.
- * Stores all `acw_*` cookies from Alibaba Cloud WAF (e.g. `acw_tc`, `acw_sc__v3`).
- * Shared between the Anthropic SDK `customFetch` and the captcha proxy route so
- * that a captcha solved via the proxy immediately unlocks AI API calls.
- */
-const wafCookieJar: Map<string, string> = new Map();
-
-/** Read the full cookie string for agentrouter.org requests. */
-export function getWafCookies(): string {
-  return Array.from(wafCookieJar.entries())
-    .map(([k, v]) => `${k}=${v}`)
-    .join("; ");
-}
-
-/** Merge one or more `Set-Cookie` values into the in-process jar. */
-export function ingestWafCookies(setCookieHeaders: string | string[] | null): void {
-  if (!setCookieHeaders) return;
-  const headers = Array.isArray(setCookieHeaders) ? setCookieHeaders : [setCookieHeaders];
-  for (const h of headers) {
-    // Match any acw_* cookie (acw_tc, acw_sc__v3, acw_sc__v2, etc.)
-    const match = h.match(/(acw_[a-z0-9_]+)=([^;]+)/i);
-    if (match) {
-      wafCookieJar.set(match[1], match[2]);
-      console.info(`[WAF] cookie jar updated: ${match[1]}=${match[2].slice(0, 12)}…`);
-    }
-  }
-}
-
-/**
- * Custom fetch wrapper for AgentRouter / Anthropic.
- * Only injects/captures WAF cookies for agentrouter.org requests.
- * Direct Anthropic API calls (sk-ant- keys → api.anthropic.com) pass through
- * the native fetch unmodified.
- */
-const customFetch: typeof fetch = async (url, init) => {
-  const urlStr = typeof url === "string" ? url : url instanceof URL ? url.href : String(url);
-  const isAgentRouter = urlStr.includes("agentrouter.org");
-
-  const headers = new Headers(init?.headers);
-  if (isAgentRouter) {
-    // AgentRouter gates on User-Agent: Cline/3.0.0 (returns 401 unauthorized_client_error otherwise)
-    const requiredUa = process.env.ANTHROPIC_USER_AGENT || "Cline/3.0.0";
-    headers.set("User-Agent", requiredUa);
-    headers.set("user-agent", requiredUa);
-
-    const cookies = getWafCookies();
-    if (cookies && !headers.has("Cookie")) {
-      headers.set("Cookie", cookies);
-    }
-  }
-
-  const response = await fetch(url, { ...init, headers });
-
-  if (isAgentRouter) {
-    const setCookie = response.headers.get("set-cookie");
-    if (setCookie) {
-      ingestWafCookies(setCookie);
-    }
-  }
-
-  return response;
-};
-
-/**
- * Returns true when the configured API key routes through AgentRouter (non sk-ant-).
- * Used to gate captcha-specific logic that is irrelevant for direct Anthropic keys.
- */
-export function isUsingAgentRouter(): boolean {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  return Boolean(apiKey && !apiKey.startsWith("sk-ant-"));
-}
-
-/**
  * Lazily construct the client on first use so dotenv has already run, then memoize it so
  * connections are reused. The cache is keyed on the credentials it was built from.
  */
@@ -131,15 +58,13 @@ function getAnthropicClient(): Anthropic | null {
   cachedClient = new Anthropic({
     apiKey,
     baseURL,
-    // AgentRouter gates on client identity; the header is only sent when routing through a gateway.
+    // AgentRouter gates on client identity; the header is sent when routing through a gateway.
     defaultHeaders: baseURL
       ? {
           "User-Agent": process.env.ANTHROPIC_USER_AGENT || "Cline/3.0.0",
           Accept: "application/json",
         }
       : undefined,
-    // Only wrap fetch for gateway keys; direct Anthropic calls don't need cookie handling.
-    fetch: baseURL ? customFetch : undefined,
     timeout: REQUEST_TIMEOUT_MS,
     maxRetries: MAX_RETRIES,
   });
@@ -153,7 +78,7 @@ export function classifyError(err: any): AIErrorType {
   const message = String(err?.message ?? err ?? "");
 
   if (status === 401 || status === 403) return "auth";
-  if (status === 404 || /model/i.test(message) && /not found|unknown|无权访问/i.test(message)) return "invalid_model";
+  if (status === 404 || (/model/i.test(message) && /not found|unknown|无权访问/i.test(message))) return "invalid_model";
   if (err?.name === "APIConnectionTimeoutError" || /timeout|ETIMEDOUT|ECONNABORTED/i.test(message)) return "timeout";
   if (typeof status === "number" && status >= 500) return "network";
   if (/ECONNREFUSED|ENOTFOUND|EAI_AGAIN|fetch failed/i.test(message)) return "network";
@@ -165,27 +90,6 @@ export class AIGatewayError extends Error {
     super(message);
     this.name = "AIGatewayError";
   }
-}
-
-export class AIGatewayCaptchaError extends Error {
-  constructor(message: string, readonly captchaHtml: string) {
-    super(message);
-    this.name = "AIGatewayCaptchaError";
-  }
-}
-
-/**
- * Stores the most recent captcha challenge HTML so the captcha proxy route
- * can serve it to the client and proxy verification requests.
- */
-let lastCaptchaHtml: string | null = null;
-
-export function getLastCaptchaHtml(): string | null {
-  return lastCaptchaHtml;
-}
-
-export function setLastCaptchaHtml(html: string | null): void {
-  lastCaptchaHtml = html;
 }
 
 export interface NormalizedResponse {
@@ -212,18 +116,6 @@ export function normalizeAnthropicResponse(rawResponse: unknown): NormalizedResp
     try {
       resObj = JSON.parse(resObj);
     } catch {
-      // If the unparseable string is HTML (e.g., Aliyun WAF captcha challenge), throw captcha error
-      if (
-        typeof resObj === "string" &&
-        (resObj.trim().toLowerCase().startsWith("<!doctype") ||
-          resObj.toLowerCase().includes("<html") ||
-          resObj.includes("aliyunwaf"))
-      ) {
-        throw new AIGatewayCaptchaError(
-          "Upstream API gateway returned an Aliyun WAF captcha challenge instead of an AI response",
-          (() => { setLastCaptchaHtml(resObj); return resObj; })()
-        );
-      }
       // Not JSON — a bare string body is the model's text.
       return { text: resObj as string, inputTokens: 0, outputTokens: 0, truncated: false };
     }
@@ -308,18 +200,6 @@ async function runCompletion(
     return { ok: true, text, model, inputTokens, outputTokens, truncated };
   } catch (err: any) {
     const durationMs = Date.now() - start;
-
-    if (err instanceof AIGatewayCaptchaError) {
-      console.warn(`[AI] ⚠️  ${label} encountered WAF captcha challenge in ${durationMs}ms with ${model}`);
-      return {
-        ok: false,
-        errorType: "network",
-        error: err.message,
-        isCaptcha: true,
-        captchaHtml: err.captchaHtml,
-      };
-    }
-
     const errorType: AIErrorType = err instanceof AIGatewayError ? err.errorType : classifyError(err);
     const error = err?.message || String(err);
 
