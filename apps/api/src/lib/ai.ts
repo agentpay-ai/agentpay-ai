@@ -84,6 +84,11 @@ const customFetch: typeof fetch = async (url, init) => {
 
   const headers = new Headers(init?.headers);
   if (isAgentRouter) {
+    // AgentRouter gates on User-Agent: Cline/3.0.0 (returns 401 unauthorized_client_error otherwise)
+    const requiredUa = process.env.ANTHROPIC_USER_AGENT || "Cline/3.0.0";
+    headers.set("User-Agent", requiredUa);
+    headers.set("user-agent", requiredUa);
+
     const cookies = getWafCookies();
     if (cookies && !headers.has("Cookie")) {
       headers.set("Cookie", cookies);

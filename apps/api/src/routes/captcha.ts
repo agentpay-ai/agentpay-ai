@@ -208,14 +208,24 @@ captchaRoute.post("/captcha/verify", async (c) => {
   activity("captcha.verify_check", { cookieCount: cookies.split(";").length });
 
   try {
-    // Lightweight probe — just check if we can get past the WAF
-    const probe = await fetch(`${AGENT_ROUTER_BASE}/v1/models`, {
-      method: "GET",
+    const apiKey = process.env.ANTHROPIC_API_KEY || "";
+    const ua = process.env.ANTHROPIC_USER_AGENT || "Cline/3.0.0";
+
+    // Probe with a minimal 1-token message request + Auth header + WAF cookies
+    const probe = await fetch(`${AGENT_ROUTER_BASE}/v1/messages`, {
+      method: "POST",
       headers: {
-        Cookie: cookies,
-        "User-Agent": process.env.ANTHROPIC_USER_AGENT || "Cline/3.0.0",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        "User-Agent": ua,
         Accept: "application/json",
+        ...(cookies ? { Cookie: cookies } : {}),
       },
+      body: JSON.stringify({
+        model: "claude-opus-5",
+        messages: [{ role: "user", content: "ping" }],
+        max_tokens: 1,
+      }),
     });
 
     const text = await probe.text();
@@ -228,9 +238,9 @@ captchaRoute.post("/captcha/verify", async (c) => {
     const setCookie = probe.headers.get("set-cookie");
     if (setCookie) ingestWafCookies(setCookie);
 
-    if (isStillCaptcha) {
-      activity("captcha.verify_failed", { reason: "still_captcha" }, "warn");
-      return c.json({ verified: false, error: "WAF still requires captcha" }, 403);
+    if (isStillCaptcha || !probe.ok) {
+      activity("captcha.verify_failed", { reason: isStillCaptcha ? "still_captcha" : `status_${probe.status}`, details: text.slice(0, 100) }, "warn");
+      return c.json({ verified: false, error: isStillCaptcha ? "WAF still requires captcha" : `Gateway returned ${probe.status}` }, 403);
     }
 
     activity("captcha.verify_ok", { status: probe.status });
