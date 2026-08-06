@@ -29,10 +29,10 @@ AgentPayAI replaces the binary subscription model with a continuous, granular mi
 
 ```
 [ Traditional Model ]   User ---> $20/Month Credit Card Subscription ---> Unlimited/Unused Compute
-[ AgentPayAI Model  ]   User/Agent ---> $0.01 Stablecoin Micro-Payment ---> 1 Prompt Execution
+[ AgentPayAI Model  ]   User/Agent ---> 1.0 $APAY Micro-Payment (EIP-3009) ---> 1 Prompt Execution
 ```
 
-By leveraging high-throughput blockchain networks (Celo and BotChain EVM) and stablecoin payment standards (x402 HTTP 402 Payment Required protocol), AgentPayAI reduces the entry barrier from $20 to $0.01 per interaction. Users pay exclusively for what they consume, funded directly from self-custodial mobile wallets (such as Celo MiniPay) or autonomous bot treasuries.
+By leveraging high-throughput blockchain infrastructure (BotChain EVM) and payment standards (x402 HTTP 402 Payment Required protocol with EIP-3009 `$APAY`), AgentPayAI reduces the entry barrier to sub-cent per interaction. Users pay exclusively for what they consume, funded directly from self-custodial Web3 wallets or autonomous bot treasuries.
 
 ---
 
@@ -40,6 +40,6 @@ By leveraging high-throughput blockchain networks (Celo and BotChain EVM) and st
 
 The addressable market for AgentPayAI spans three expanding sectors:
 
-1. **Mobile-First Web3 Users in Emerging Markets**: Over 6 million registered Celo MiniPay wallets seeking low-cost utility applications.
+1. **Web3 Mobile & AI Consumer Networks**: Millions of mobile users seeking low-cost utility applications without monthly subscriptions.
 2. **BotChain Autonomous Agent Developers**: Developers seeking to monetize autonomous bots or provision agent infrastructure through the BotChain Ecosystem Support Program.
 3. **API Consumer Networks**: Developers requiring programmatic LLM and image generation rails without maintaining centralized payment gateways or managing API key leaks.

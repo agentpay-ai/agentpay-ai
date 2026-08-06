@@ -8,7 +8,7 @@ AgentPayAI addresses this structural inefficiency by operating as a **decentrali
 
 1. **Bulk Compute Aggregation**: AgentPayAI secures enterprise API inference access from major AI model providers (Google Gemini, Anthropic Claude, OpenAI GPT-4o, xAI Grok, and synthetic image generators).
 2. **Fractionalization and Reselling**: The protocol fractionalizes bulk AI inference into granular, sub-cent pay-per-prompt units ($0.01 to $0.05 per call).
-3. **Onchain Micropayment Rail**: End-users and autonomous software bots purchase compute on-demand using self-custodial Web3 wallets (such as Celo MiniPay and BotChain wallets) settled in stablecoins (USDm/USDC) or native **$APAY** tokens via the x402 HTTP payment protocol.
+3. **Onchain Micropayment Rail**: End-users and autonomous software bots purchase compute on-demand using self-custodial Web3 wallets settled in native **$APAY** tokens (EIP-3009 compliant) via the x402 HTTP payment protocol on BotChain.
 
 By decoupling access from monthly recurring SaaS subscriptions, providing native token utility ($APAY prompt fee discounts and staking), and attaching cryptographic proof of execution to every request, AgentPayAI establishes a universal payment and identity layer for human users and autonomous agents alike.
 
@@ -31,10 +31,10 @@ BotChain provides the foundational decentralized network for autonomous bots, ma
 
 The AgentPayAI protocol introduces four primary technical innovations:
 
-1. **Dual-Engine Settlement Core**: Simultaneous support for Celo MiniPay (CIP-64 gas fee abstraction, x402 HTTP 402 payment protocol) and BotChain EVM execution environments.
-2. **Sub-Cent Unit Economics & $APAY Utility**: Transaction settlement costs scaled down to $0.01 USDm (or discounted $APAY tokens) for text prompts, $0.02 USDm for code audits, and $0.05 USDm for high-resolution image rendering.
+1. **Native x402 EIP-3009 Settlement Core**: Gasless EIP-712 pay-per-prompt settlement in native **$APAY** tokens (EIP-3009 compliant) via the x402 protocol on BotChain.
+2. **Sub-Cent Unit Economics & $APAY Utility**: Transaction settlement scaled down to 1.0 $APAY for text prompts, 2.0 $APAY for code audits, and 5.0 $APAY for high-resolution image rendering.
 3. **Cryptographic Builder Attribution**: ERC-8021 metadata tags appended to transaction call data, providing immutable onchain proof of origin for leaderboard indexing and grant allocation tracking.
-4. **Multi-Model Intelligence Network**: A modular gateway architecture capable of dynamically routing queries between cost-effective development tiers (Google Gemini 2.5 Flash) and high-reasoning production models (Claude 3.5 Opus, GPT-4o, Grok).
+4. **Multi-Model Intelligence Network**: A modular gateway architecture capable of dynamically routing queries between cost-effective development tiers and high-reasoning production models (Claude 3.5 Opus, GPT-4o, Grok).
 
 ---
 
@@ -43,7 +43,7 @@ The AgentPayAI protocol introduces four primary technical innovations:
 | Parameter | Protocol Target | Significance |
 |---|---|---|
 | Average Settlement Latency | < 2.0 Seconds | Matches Web2 user experience expectations on mobile devices |
-| Minimum Transaction Unit | $0.001 USDm / 0.1 $APAY | Enables granular per-token or per-inference billing |
-| Token Utility | $APAY Native | 20% prompt discounts, tier staking, bot collateral |
-| Gas Friction | 0 Native Gas Required | CIP-64 & BotChain abstraction allow users to pay gas in stablecoins or $APAY |
+| Minimum Transaction Unit | 1.0 $APAY | Enables granular per-token or per-inference billing |
+| Token Utility | $APAY Native | EIP-3009 gasless transfers, tier staking, bot collateral |
+| Gas Friction | 0 Native Gas Required | EIP-3009 transferWithAuthorization allows gasless user signatures |
 | Onchain Auditability | 100% Verified | Every inference request corresponds to a verifiable onchain transaction |

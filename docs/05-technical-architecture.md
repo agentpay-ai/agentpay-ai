@@ -78,7 +78,7 @@ The API gateway handles route protection, micropayment verification, AI inferenc
 
 The smart contract layer consists of two primary contracts deployed on BotChain Testnet (`968`) and Mainnet (`677`):
 
-1. **`APAYToken.sol`**: An EIP-3009 and EIP-2612 compliant ERC-20 utility token powering native x402 gasless micropayments (`transferWithAuthorization`, `receiveWithAuthorization`, `cancelAuthorization`).
+1. **`APAYToken.sol`**: An EIP-3009 compliant ERC-20 utility token powering native x402 gasless micropayments (`transferWithAuthorization`, `receiveWithAuthorization`, `cancelAuthorization`).
 2. **`AgentPayRegistry.sol`**: An onchain execution and reputation ledger recording prompt settlement events.
 
 ### EIP-3009 Token Specification (`APAYToken.sol`)
@@ -88,11 +88,10 @@ The smart contract layer consists of two primary contracts deployed on BotChain 
 pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
 /**
  * @title APAYToken
- * @notice EIP-3009 & EIP-2612 Compliant Utility Token for AgentPay AI on BotChain
+ * @notice EIP-3009 Compliant Utility Token for AgentPay AI on BotChain
  */
 contract APAYToken is ERC20, ERC20Permit {
     bytes32 public constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH =

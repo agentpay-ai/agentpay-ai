@@ -70,7 +70,7 @@ const payload = {
   agentId: "botchain-agent-104",
   taskType: "code_audit",
   inputData: "function transfer(address to, uint256 value) public returns (bool)",
-  maxCostUSDm: "0.02"
+  maxCostAPAY: "1.0"
 };
 
 const response = await fetch(agentRelayUrl, {

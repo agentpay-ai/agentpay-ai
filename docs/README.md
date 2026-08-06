@@ -10,7 +10,7 @@ AgentPayAI is a multi-chain payment protocol and execution infrastructure engine
 
 AgentPayAI operates as a **decentralized AI compute aggregator and micropayment gateway**. It procures enterprise API inference access from leading AI providers (Google Gemini, Anthropic Claude, OpenAI, xAI Grok) and fractionalizes compute into sub-cent, pay-per-prompt units (\$0.01 to \$0.05 per call) resold directly to mobile users and autonomous bots via sub-second onchain micropayments.
 
-Designed for seamless deployment across **BotChain's Autonomous AI Agent Network** and **Celo MiniPay**, AgentPayAI serves as foundational infrastructure for human-to-agent interactions, machine-to-machine task delegation, and economic sustainability within the decentralized AI ecosystem.
+Designed for seamless deployment across **BotChain's Autonomous AI Agent Network**, AgentPayAI serves as foundational infrastructure for human-to-agent interactions, machine-to-machine task delegation, and economic sustainability within the decentralized AI ecosystem.
 
 ---
 
@@ -22,13 +22,13 @@ Designed for seamless deployment across **BotChain's Autonomous AI Agent Network
    System operational thesis, primary innovations, compute aggregation model, and strategic alignment with the BotChain Ecosystem Support Program and BOT Infrastructure Grant.
 
 2. **[Chapter 2: Problem Statement and Market Opportunity](02-problem-and-market-opportunity.md)**  
-   Economic barriers of flat-rate SaaS subscriptions in developing economies, the necessity of micro-metered access rails, and machine-to-machine (M2M) autonomous agent requirements.
+   Economic barriers of flat-rate SaaS subscriptions, the necessity of micro-metered access rails, and machine-to-machine (M2M) autonomous agent requirements.
 
 3. **[Chapter 3: BotChain Protocol Integration and Infrastructure Grant Alignment](03-botchain-protocol-integration.md)**  
-   Architectural integration with BotChain autonomous agent frameworks, BotChain ecosystem business model (5 revenue pillars), agent relay routes (`/api/botchain/relay`), and BOT infrastructure grant allocation.
+   Architectural integration with BotChain autonomous agent frameworks, BotChain ecosystem business model, agent relay routes (`/api/botchain/relay`), and BOT infrastructure grant allocation.
 
-4. **[Chapter 4: Celo MiniPay and x402 Micropayment Engine](04-celo-minipay-and-x402-engine.md)**  
-   Mobile wallet auto-connection, CIP-64 gas fee abstraction, x402 HTTP payment protocols, ERC-8004 identity, and ERC-8021 builder attribution.
+4. **[Chapter 4: x402 Micropayment Engine and EIP-3009 Protocol](04-celo-minipay-and-x402-engine.md)**  
+   x402 HTTP payment engine, gasless $APAY EIP-3009 (`transferWithAuthorization`) settlement, ERC-8004 identity, and ERC-8021 builder attribution.
 
 5. **[Chapter 5: Technical Architecture and Smart Contracts](05-technical-architecture.md)**  
    System architecture diagrams, compute aggregation pipeline, enterprise AI provider routing (Gemini 2.5 Flash, Claude 3.5 Opus, GPT-4o, Grok), Hono API gateway specification, and `AgentPayRegistry.sol` smart contract implementation.

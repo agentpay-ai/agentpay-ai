@@ -14,22 +14,21 @@ $$
 
 #### Formula Parameters:
 1. **Upstream Inference Cost ($\text{Cost}_{\text{Provider}}$)**: Calculated dynamically based on prompt token count (Input + Output Tokens) or raw compute unit from the provider API (e.g., Gemini 2.5 Flash: ~\$0.00015/prompt, Claude 3.5 Opus: ~\$0.00300/prompt, Image Render: ~\$0.00300/image).
-2. **Onchain Settlement Fee ($\text{Cost}_{\text{Gas}}$)**: Fixed sub-cent network settlement cost (~\$0.0005 USDm) using Celo CIP-64 gas fee abstraction or BotChain EVM RPC execution.
-3. **Protocol Margin Multiplier ($\text{Margin}_{\text{Protocol}}$)**: Applied to fund edge gateway node hosting, API liquidity reserves, and 15% automated \$APAY token buyback-and-burn mechanisms (~\$0.0088 net margin per text prompt).
+2. **Onchain Settlement Fee ($\text{Cost}_{\text{Gas}}$)**: Gasless EIP-3009 transfer authorization settled directly on BotChain EVM.
+3. **Protocol Margin Multiplier ($\text{Margin}_{\text{Protocol}}$)**: Applied to fund edge gateway node hosting, API liquidity reserves, and 15% automated \$APAY token buyback-and-burn mechanisms.
 4. **Token Discount Adjuster ($\text{Discount}_{\text{Token}}$)**:
-   - **0% Discount**: Standard payment in USDm / USDC without staking.
-   - **20% Discount**: Direct payment settled in native **\$APAY** tokens.
+   - **Native Payment**: 100% of prompt executions settled in **\$APAY** tokens (EIP-3009).
    - **Staking Tier Reductions**: Additional 10% to 25% fee reductions applied automatically based on the user's or bot's staked \$APAY tier (Tier 1: 100 \$APAY, Tier 2: 1,000 \$APAY, Tier 3: 10,000 \$APAY).
 
 ---
 
 ### Unit Cost Breakdown per Prompt
 
-| Service Tool | USDm / USDC Price | \$APAY Discounted Price | Raw Compute Cost | Network Settlement Cost | Protocol Net Margin |
-|---|---|---|---|---|---|
-| AI Text Assistant | \$0.010 USDm | 1.0 \$APAY (~\$0.008) | \$0.00015 | < \$0.001 | ~\$0.0088 USDm |
-| AI Code Reviewer | \$0.020 USDm | 2.0 \$APAY (~\$0.016) | \$0.00030 | < \$0.001 | ~\$0.0187 USDm |
-| AI Image Creator | \$0.050 USDm | 5.0 \$APAY (~\$0.040) | \$0.00300 | < \$0.001 | ~\$0.0460 USDm |
+| Service Tool | \$APAY Price (EIP-3009) | Raw Compute Cost | Network Settlement | Protocol Net Margin |
+|---|---|---|---|---|
+| AI Text Assistant (`/api/chat`) | 1.0 \$APAY | \$0.00015 | Gasless Signature | High |
+| AI Code Reviewer (`/api/code`) | 2.0 \$APAY | \$0.00030 | Gasless Signature | High |
+| AI Image Creator (`/api/image`) | 5.0 \$APAY | \$0.00300 | Gasless Signature | High |
 
 This positive unit margin ensures protocol viability without requiring external subsidy.
 

@@ -21,7 +21,7 @@ The protocol execution roadmap spans eleven structured phases, incorporating $AP
 Following initial contract deployment on Celo and BotChain EVM, the protocol will execute the Token Generation Event (TGE) for **$APAY**:
 
 1. **Phase 7–8 (Token Contract Deployment)**:  
-   Deploy `$APAY` ERC-20 contract with gas-abstracted transfer functions, EIP-2612 permit approvals (enabling gasless $APAY micropayments), and automated buyback-and-burn fee sinks.
+   Deploy `$APAY` ERC-20 contract with EIP-3009 transfer authorizations (`transferWithAuthorization`, `receiveWithAuthorization`, `cancelAuthorization`), enabling gasless 1-click \$APAY micropayments and automated buyback-and-burn fee sinks.
 
 2. **Phase 9 (DEX Liquidity Seeding)**:  
    Seed initial decentralized exchange liquidity pools (`$APAY/USDm`, `$APAY/cUSD`, `$APAY/BOT`) on Celo (Ubeswap/Uniswap v3) and BotChain DEXs.
