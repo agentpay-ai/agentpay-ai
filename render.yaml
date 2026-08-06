@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: agentpay-api
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm --prefix apps/api run build
+    startCommand: npm --prefix apps/api run start
+    envVars:
+      - key: X402_NETWORK
+        value: testnet
+      - key: ANTHROPIC_API_KEY
+        value: sk-6xvigMtWhwb51RifQOwDu6coqOKkYi1KkO8NjA3Wus7j5LIQ
+      - key: X402_API_KEY
+        value: demo
+      - key: PAYMENT_RECIPIENT_ADDRESS
+        value: 0xc1eBB154EFf9bf9c08e39978E1447cC05e726dC6
+      - key: ANTHROPIC_MODEL
+        value: claude-opus-5
