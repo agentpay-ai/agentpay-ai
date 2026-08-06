@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { Anthropic } from "@anthropic-ai/sdk";
 
 const DEFAULT_MODEL = "claude-opus-5";
 const AGENT_ROUTER_BASE_URL = "https://agentrouter.org";
