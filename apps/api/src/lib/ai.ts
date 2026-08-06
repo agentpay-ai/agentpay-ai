@@ -43,6 +43,29 @@ function resolveBaseURL(apiKey: string): string | undefined {
 let cachedClient: Anthropic | null = null;
 let cachedClientKey: string | null = null;
 
+let agentRouterCookie = "";
+
+/**
+ * Custom fetch wrapper for AgentRouter / Anthropic.
+ * Persists the `acw_tc` WAF cookie set by Alibaba Cloud WAF so subsequent API calls
+ * pass security verification without triggering captcha challenges.
+ */
+const customFetch: typeof fetch = async (url, init) => {
+  const headers = new Headers(init?.headers);
+  if (agentRouterCookie && !headers.has("Cookie")) {
+    headers.set("Cookie", agentRouterCookie);
+  }
+  const response = await fetch(url, { ...init, headers });
+  const setCookie = response.headers.get("set-cookie");
+  if (setCookie) {
+    const match = setCookie.match(/acw_tc=[^;]+/);
+    if (match) {
+      agentRouterCookie = match[0];
+    }
+  }
+  return response;
+};
+
 /**
  * Lazily construct the client on first use so dotenv has already run, then memoize it so
  * connections are reused. The cache is keyed on the credentials it was built from.
@@ -59,7 +82,13 @@ function getAnthropicClient(): Anthropic | null {
     apiKey,
     baseURL,
     // AgentRouter gates on client identity; the header is only sent when routing through a gateway.
-    defaultHeaders: baseURL ? { "User-Agent": process.env.ANTHROPIC_USER_AGENT || "Cline/3.0.0" } : undefined,
+    defaultHeaders: baseURL
+      ? {
+          "User-Agent": process.env.ANTHROPIC_USER_AGENT || "Cline/3.0.0",
+          Accept: "application/json",
+        }
+      : undefined,
+    fetch: customFetch,
     timeout: REQUEST_TIMEOUT_MS,
     maxRetries: MAX_RETRIES,
   });
