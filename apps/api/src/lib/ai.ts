@@ -111,6 +111,18 @@ export function normalizeAnthropicResponse(rawResponse: unknown): NormalizedResp
     try {
       resObj = JSON.parse(resObj);
     } catch {
+      // If the unparseable string is HTML (e.g., Aliyun WAF captcha challenge), throw gateway error
+      if (
+        typeof resObj === "string" &&
+        (resObj.trim().toLowerCase().startsWith("<!doctype") ||
+          resObj.toLowerCase().includes("<html") ||
+          resObj.includes("aliyunwaf"))
+      ) {
+        throw new AIGatewayError(
+          "Upstream API gateway returned an Aliyun WAF captcha challenge instead of an AI response",
+          "network"
+        );
+      }
       // Not JSON — a bare string body is the model's text.
       return { text: resObj as string, inputTokens: 0, outputTokens: 0, truncated: false };
     }
