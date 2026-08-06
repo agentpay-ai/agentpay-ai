@@ -76,7 +76,7 @@ AgentPayAI proposes the following structured capital allocation for grant fundin
 ```
 
 ### Allocation Breakdown:
-1. **Infrastructure & Gateway Scaling (40%)**: Provisioning global edge API gateways (Railway/AWS) and dedicated RPC endpoints to ensure sub-2-second settlement across BotChain EVM networks.
+1. **Infrastructure & Gateway Scaling (40%)**: Provisioning global serverless API gateways (Vercel) and dedicated RPC endpoints to ensure sub-2-second settlement across BotChain EVM networks.
 2. **Multi-Model Inference Liquidity (25%)**: Funding upstream API credit reserves for advanced reasoning models (Claude 3.5 Opus and OpenAI GPT-4o), ensuring zero downtime for high-priority bot relays.
 3. **\$APAY Liquidity Provision (20%)**: Initial liquidity seeding for \$APAY token pairs (\$APAY/USDm, \$APAY/cUSD, \$APAY/BOT) across Celo and BotChain decentralized exchanges.
 4. **Security Audits & Protocol Hardening (15%)**: Comprehensive smart contract audits for `AgentPayRegistry.sol`, \$APAY token contracts, and ERC-8004 identity protocols.

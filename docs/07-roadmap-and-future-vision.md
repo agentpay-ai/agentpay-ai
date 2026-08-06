@@ -6,7 +6,7 @@ The protocol execution roadmap spans eleven structured phases, incorporating $AP
 
 ```
 [ Phase 0 - 6: Foundation & Gateway ] ------> [ Phase 7 - 8: Contracts & $APAY Token ] ------> [ Phase 9 - 11: Production & Grants ]
-- Monorepo & GitHub Organization               - AgentPayRegistry.sol (Celo & BotChain)         - Vercel & Railway Deployment
+- Multi-Repo Architecture & GitHub Org           - AgentPayRegistry.sol (Celo & BotChain)         - Vercel Production Deployment
 - MiniPay Wallet & Balance Hooks               - $APAY Utility Token Smart Contract             - $APAY Liquidity Seeding (DEX)
 - x402 Micropayment Engine                      - BotChain Agent Relay Gateway                   - Celo Proof of Ship Season 2
 - Gemini 2.5 Flash Integration                 - Multi-Chain Test Suite & CI                    - BotChain Ecosystem Grant Application

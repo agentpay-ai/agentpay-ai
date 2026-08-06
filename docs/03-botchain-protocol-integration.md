@@ -64,7 +64,7 @@ To integrate an autonomous bot with AgentPayAI on BotChain, client applications 
 // Sample Autonomous Bot Relay Call
 import { wrapFetchWithPayment } from "@x402/fetch";
 
-const agentRelayUrl = "https://api.agentpay.app/api/botchain/relay";
+const agentRelayUrl = "https://agentpay-backend-eight.vercel.app/api/botchain/relay";
 
 const payload = {
   agentId: "botchain-agent-104",

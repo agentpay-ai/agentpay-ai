@@ -95,18 +95,15 @@ agentpay-ai/
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/agentpay-ai/agentpay-ai.git
-cd agentpay-ai
+# Clone the whitepaper repository
+git clone https://github.com/agentpay-ai/agentpay-whitepaper.git
+cd agentpay-whitepaper
 
-# Install root dependencies
-npm install
+# Frontend application repository:
+# https://github.com/agentpay-ai/agentpay_frontend
 
-# Run Hono API gateway
-cd apps/api && npm run dev
-
-# Run Next.js MiniApp frontend
-cd apps/web && npm run dev
+# Backend API gateway repository:
+# https://github.com/agentpay-ai/agentpay_backend
 ```
 
 ---

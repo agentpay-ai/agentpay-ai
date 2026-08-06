@@ -2,26 +2,26 @@
 
 ## 5.1 System Architecture
 
-AgentPayAI is constructed as a monorepo containing three core packages: `apps/web` (Next.js frontend), `apps/api` (Hono API gateway), and `contracts/` (Solidity smart contracts).
+AgentPayAI is constructed as a decoupled multi-repository architecture containing: `agentpay_frontend` (Next.js 16 web interface), `agentpay_backend` (Express.js API gateway), and `contracts/` (Solidity smart contracts).
 
 ```
                       +----------------------------------+
-                      |       Next.js 14/15 Frontend     |
-                      |       (apps/web - MiniPay UI)    |
+                      |     Next.js 16 Frontend App      |
+                      |       (agentpay_frontend)        |
                       +----------------------------------+
                                        |
                                 HTTP / REST
                                        |
                                        v
                       +----------------------------------+
-                      |         Hono API Gateway         |
-                      |         (apps/api)               |
+                      |     Express.js API Gateway       |
+                      |       (agentpay_backend)         |
                       +----------------------------------+
                          /             |              \
                         /              |               \
                        v               v                v
           +------------------+  +--------------+  +-------------------+
-          | x402 Facilitator |  | Gemini / AI  |  | BotChain Agent    |
+          | x402 Facilitator |  | Claude / AI  |  | BotChain Agent    |
           | Settlement Core  |  | Model Engine |  | Relay Protocol    |
           +------------------+  +--------------+  +-------------------+
                        |                                |
@@ -36,17 +36,17 @@ AgentPayAI is constructed as a monorepo containing three core packages: `apps/we
 
 ## 5.2 Compute Aggregation, Reselling Model, and Upstream Routing
 
-AgentPayAI operates as a decentralized compute aggregator. It procures enterprise inference access from primary AI providers (Google Gemini, Anthropic Claude, OpenAI, xAI Grok) and resells compute capabilities to end-users and autonomous software agents on a pay-per-prompt basis through a 3-stage execution pipeline:
+AgentPayAI operates as a decentralized compute aggregator. It procures enterprise inference access from primary AI providers (Anthropic Claude, Google Gemini, OpenAI) and resells compute capabilities to end-users and autonomous software agents on a pay-per-prompt basis through a 3-stage execution pipeline:
 
-### 1. API Gateway Interception & Reselling Meter (`apps/api`)
-The core gateway is built on the Hono framework and edge-deployed for low-latency response times. Whenever a client interface (Next.js MiniApp) or autonomous software bot issues a request to `/api/chat`, `/api/image`, `/api/code`, or `/api/botchain/relay`, the gateway intercepts the request.
+### 1. API Gateway Interception & Reselling Meter (`agentpay_backend`)
+The core gateway is built on Express.js with `@x402/express` middleware and deployed on Vercel for low-latency response times. Whenever a client interface (`agentpay_frontend`) or autonomous software bot issues a request to `/api/chat`, `/api/image`, `/api/code`, or `/api/botchain/relay`, the gateway intercepts the request.
 
-Before issuing any upstream AI API calls, the gateway verifies the attached `x402` micropayment header (or $APAY token signature). If no valid payment is present, it halts execution and returns `HTTP 402 Payment Required`.
+Before issuing any upstream AI API calls, the gateway verifies the attached `X-AgentPay-Payment-Tx` micropayment header (or prepaid session token). If no valid payment is present, it halts execution and returns `HTTP 402 Payment Required`.
 
 ### 2. Upstream Enterprise Provider Routing
-Once micropayment settlement is verified, the gateway dispatches the prompt payload to upstream AI model providers using protocol-managed API key pools:
-- **LLM Text Completions (`/api/chat`)**: Integrates directly with `@google/genai` SDK for Google Gemini 2.5 Flash / Flash Lite, with dynamic routing adapters for Anthropic Claude 3.5 Opus, OpenAI GPT-4o, and xAI Grok.
-- **AI Image Rendering (`/api/image`)**: Routes prompts through visual rendering engines (SDXL / Gemini Image / Replicate) to return high-resolution base64 or CDN image payloads.
+Once micropayment settlement is verified, the gateway dispatches the prompt payload to upstream AI model providers using protocol-managed API keys:
+- **LLM Text Completions (`/api/chat`)**: Integrates directly with `@anthropic-ai/sdk` for Anthropic Claude (`claude-opus-5`).
+- **AI Image Rendering (`/api/image`)**: Enhances prompts and routes to image generation pipelines.
 - **Smart Contract Code Auditing (`/api/code`)**: Combines AST-level static code parsing with specialized LLM vulnerability detection models to analyze Solidity code snippets and generate structured security risk reports.
 - **Autonomous Bot Relays (`/api/botchain/relay`)**: Programmatic JSON-RPC relay formatting machine-to-machine task payloads for BotChain agents.
 
@@ -57,7 +57,7 @@ Upon receiving the inference output from upstream model providers:
 
 ---
 
-## 5.3 Hono API Gateway Specification (`apps/api`)
+## 5.3 Express.js API Gateway Specification (`agentpay_backend`)
 
 The API gateway handles route protection, micropayment verification, AI inference orchestration, and event logging.
 
