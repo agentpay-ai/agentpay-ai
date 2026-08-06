@@ -58,6 +58,10 @@ export default function CodePage() {
       setAuditResult(data.audit);
       refetch();
     } catch (err: unknown) {
+      if ((err as any)?.name === "CaptchaRequiredError" || (err as any)?.isCaptcha) {
+        console.info("[code] Captcha required — modal opened");
+        return;
+      }
       console.error("Audit error:", err);
       setError(err instanceof Error ? err.message : "Audit failed");
     } finally {

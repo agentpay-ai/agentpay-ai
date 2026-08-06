@@ -77,13 +77,20 @@ export default function ChatPage() {
       ]);
       refetch();
     } catch (err: unknown) {
+      if ((err as any)?.name === "CaptchaRequiredError" || (err as any)?.isCaptcha) {
+        console.info("[chat] Captcha required — modal opened, preserving user prompt");
+        setPrompt(userPrompt);
+        // Remove transient user message from list since request is waiting for captcha
+        setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
+        return;
+      }
       console.error("Chat error:", err);
       setMessages((prev) => [
         ...prev,
         {
           id: `error-${Date.now()}`,
           sender: "ai",
-          text: `Error: ${err instanceof Error ? err.message : "Request failed"}`,
+          text: err instanceof Error ? err.message : "Chat request failed",
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           isError: true,
         },

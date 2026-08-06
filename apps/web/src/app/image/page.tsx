@@ -51,6 +51,10 @@ export default function ImagePage() {
       setImageUrl(data.imageUrl);
       refetch();
     } catch (err: unknown) {
+      if ((err as any)?.name === "CaptchaRequiredError" || (err as any)?.isCaptcha) {
+        console.info("[image] Captcha required — modal opened");
+        return;
+      }
       console.error("Image generation error:", err);
       setError(err instanceof Error ? err.message : "Image generation failed");
     } finally {

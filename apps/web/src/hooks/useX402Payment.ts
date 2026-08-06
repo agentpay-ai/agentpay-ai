@@ -502,10 +502,12 @@ export function useX402Payment() {
         url,
         mergeHeaders(init, { [PAYMENT_TX_HEADER]: hash })
       );
-      console.info("[agentpay] paid ←", paid.status, url, "tx=", hash);
-
       return await parseResponseOrThrow<T>(paid);
     } catch (err: unknown) {
+      if (err instanceof CaptchaRequiredError || (err as any)?.name === "CaptchaRequiredError") {
+        console.info("[agentpay] request requires captcha verification");
+        throw err;
+      }
       const errMsg = err instanceof Error ? err.message : "Payment execution failed";
       console.error("[agentpay] request failed:", errMsg);
       setError(errMsg);
