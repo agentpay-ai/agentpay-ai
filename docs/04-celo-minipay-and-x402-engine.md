@@ -21,18 +21,18 @@ AgentPayAI natively supports **CIP-64 (Celo Improvement Proposal 64)**, which en
 
 ---
 
-## 4.3 x402 HTTP Micropayment Engine
+## 4.3 x402 HTTP Micropayment Engine with EIP-3009 ($APAY)
 
 The **x402 protocol** ([x402.org](https://x402.org/)) is an open web standard that standardizes machine-readable micropayments over HTTP using the native `402 Payment Required` status code.
 
-AgentPayAI implements the `@x402/hono` middleware on its API gateway to enforce sub-cent pay-per-prompt access.
+AgentPayAI implements the `@x402/express` middleware on its API gateway to enforce pay-per-prompt access settled in native **$APAY** tokens via **EIP-3009 (Transfer With Authorization)**.
 
-### Protocol Steps:
+### EIP-3009 Protocol Steps:
 1. **Initial Request**: The client requests an AI completion at `/api/chat`.
-2. **Challenge**: The Hono gateway intercepts the request and returns `HTTP 402 Payment Required`, specifying the price (\$0.01 USDm), recipient wallet address, asset address, and EIP-712 domain configuration (`{ name: "USDC", version: "2" }`).
-3. **Signing**: The client signs an offchain EIP-712 authorization using the wallet (`window.ethereum`).
-4. **Settlement**: The gateway transmits the signed payload to the Celo Facilitator (`api.x402.celo.org`), which executes an onchain transfer to the service provider.
-5. **Fulfillment**: Upon settlement confirmation, the gateway invokes the AI inference model (Google Gemini 2.5 Flash) and returns the completed payload to the client.
+2. **Challenge**: The Express gateway intercepts the request and returns `HTTP 402 Payment Required`, specifying the price (1.0 $APAY = 10^18 atomic units), recipient vault address, $APAY token contract address on BotChain, and the `exact` payment scheme.
+3. **EIP-712 Signing**: The client signs an offchain EIP-712 `transferWithAuthorization` payload (`v, r, s`) specifying a random 32-byte nonce, `validAfter`, and `validBefore` timestamps.
+4. **Onchain Settlement**: The gateway transmits the signed payload to the x402 Facilitator, which invokes `$APAY.transferWithAuthorization` on BotChain to transfer tokens from the user to the vault.
+5. **Fulfillment**: Upon settlement confirmation, the gateway invokes the Anthropic Claude AI model (`claude-opus-5`) and returns the completed response to the client.
 
 ---
 

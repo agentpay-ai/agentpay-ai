@@ -37,12 +37,12 @@ This positive unit margin ensures protocol viability without requiring external 
 
 ## 6.2 Native Utility Token (\$APAY) Architecture
 
-To establish long-term economic alignment across users, autonomous bots, and infrastructure providers, AgentPayAI will deploy its native utility and governance token: **\$APAY** (AgentPay Token).
+To establish long-term economic alignment across users, autonomous bots, and infrastructure providers, AgentPayAI operates using its native utility and governance token: **\$APAY** (AgentPay Token), implemented as an **EIP-3009 compliant ERC-20 token** on BotChain.
 
 ### Primary Token Utilities
 
-1. **Pay-Per-Prompt Settlement Engine**:
-   Users and autonomous bots can pay for AI completions directly using \$APAY. Prompt executions paid in \$APAY receive a **20% protocol discount** compared to standard stablecoin payments.
+1. **EIP-3009 Native Pay-Per-Prompt Settlement Engine**:
+   Users and autonomous bots pay for AI completions directly using \$APAY via gasless `transferWithAuthorization` EIP-712 signatures. \$APAY serves as the exclusive native utility token across the AgentPay AI platform.
 
 2. **Staking & Tiered Fee Discounts**:
    Holding and staking \$APAY unlocks tiered benefits across the protocol:

@@ -74,9 +74,48 @@ The API gateway handles route protection, micropayment verification, AI inferenc
 
 ---
 
-## 5.4 Smart Contract Implementation (`AgentPayRegistry.sol`)
+## 5.4 Smart Contract Architecture (`agentpay_contracts`)
 
-The `AgentPayRegistry.sol` contract provides an onchain ledger of prompt executions and micropayments across Celo and BotChain EVM networks.
+The smart contract layer consists of two primary contracts deployed on BotChain Testnet (`968`) and Mainnet (`677`):
+
+1. **`APAYToken.sol`**: An EIP-3009 and EIP-2612 compliant ERC-20 utility token powering native x402 gasless micropayments (`transferWithAuthorization`, `receiveWithAuthorization`, `cancelAuthorization`).
+2. **`AgentPayRegistry.sol`**: An onchain execution and reputation ledger recording prompt settlement events.
+
+### EIP-3009 Token Specification (`APAYToken.sol`)
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+
+/**
+ * @title APAYToken
+ * @notice EIP-3009 & EIP-2612 Compliant Utility Token for AgentPay AI on BotChain
+ */
+contract APAYToken is ERC20, ERC20Permit {
+    bytes32 public constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH =
+        keccak256("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)");
+
+    bytes32 public constant RECEIVE_WITH_AUTHORIZATION_TYPEHASH =
+        keccak256("ReceiveWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)");
+
+    bytes32 public constant CANCEL_AUTHORIZATION_TYPEHASH =
+        keccak256("CancelAuthorization(address authorizer,bytes32 nonce)");
+
+    mapping(address => mapping(bytes32 => bool)) private _authorizationStates;
+
+    event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce);
+    event AuthorizationCanceled(address indexed authorizer, bytes32 indexed nonce);
+
+    function authorizationState(address authorizer, bytes32 nonce) external view returns (bool) {
+        return _authorizationStates[authorizer][nonce];
+    }
+}
+```
+
+### Registry Contract Implementation (`AgentPayRegistry.sol`)
 
 ```solidity
 // SPDX-License-Identifier: MIT
