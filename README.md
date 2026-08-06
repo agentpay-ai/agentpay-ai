@@ -11,7 +11,7 @@
 AgentPayAI is a mobile-first, multi-chain AI MiniApp and autonomous agent payment gateway built for both the **BotChain** AI agent ecosystem ([botchain.notion.site/bot-chain-ecosystem-support-program-en](https://botchain.notion.site/bot-chain-ecosystem-support-program-en), [dev-docs.botchain.ai](https://dev-docs.botchain.ai/)) and **Celo MiniPay** users.
 
 AgentPayAI operates as a **decentralized AI compute aggregator and micropayment gateway**:
-1. **Bulk Compute Aggregation**: Procures enterprise API inference access from major AI model providers (Google Gemini, Anthropic Claude, OpenAI GPT-4o, xAI Grok).
+1. **Bulk Compute Aggregation**: Procures enterprise API inference access from major AI model providers (Anthropic Claude, OpenAI GPT-4o, DeepSeek, xAI Grok).
 2. **Fractionalization and Reselling**: Fractionalizes bulk compute into sub-cent, pay-per-prompt units (\$0.01 to \$0.05 per call) resold directly to mobile users and autonomous software agents.
 3. **Onchain Micropayment Rail**: Settles transactions ondemand in stablecoins (USDm/USDC) or native **\$APAY** tokens via x402 HTTP payment signatures—requiring no credit cards or recurring monthly SaaS subscriptions.
 
@@ -72,7 +72,7 @@ agentpay-ai/
 ```
 
 - **Frontend**: Next.js (App Router), Tailwind CSS, viem, wagmi, `@x402/fetch`
-- **Backend Gateway**: Hono framework, `@x402/hono`, `@google/genai` (Gemini 2.5 Flash / Flash Lite)
+- **Backend Gateway**: Hono framework, `@x402/hono`, `@anthropic-ai/sdk` (Anthropic Claude Opus 5 / Haiku)
 - **AI Agent Protocols**: **BotChain** (AI Agent Protocol & Execution Framework), **ERC-8004** Identity & Reputation Registries
 - **Smart Contracts**: Foundry, Solidity 0.8.24, ERC-8004 identity registration
 - **Payments Protocol**: x402 Facilitator (`https://api.x402.celo.org`) & BotChain micropayment settlement
@@ -90,7 +90,7 @@ agentpay-ai/
 - Foundry (`forge`, `cast`)
 - Celo Sepolia / Mainnet / BotChain RPC URL
 - x402 API key from `https://x402.celo.org`
-- Google Gemini API key
+- Anthropic Claude / AgentRouter API key
 
 ### Installation
 
