@@ -2,7 +2,7 @@ services:
   - type: web
     name: agentpay-api
     env: node
-    region: oregon
+    region: singapore
     plan: free
     buildCommand: npm install && npm --prefix apps/api run build
     startCommand: npm --prefix apps/api run start
