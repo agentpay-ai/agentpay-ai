@@ -6,7 +6,7 @@ The **x402 protocol** ([x402.org](https://x402.org/)) is an open web standard th
 
 In traditional Web2 architectures, digital services enforce access control via rigid monthly SaaS subscriptions, API keys tied to credit cards, or ad-supported tracking models. x402 replaces these friction-heavy gates with direct, sub-second micropayment challenges executed transparently over standard HTTP request headers.
 
-AgentPayAI implements the `@x402/express` middleware on its API gateway to enforce pay-per-prompt access settled in native **$APAY** tokens on BotChain.
+AgentPayAI implements the `@x402/express` middleware on its API gateway to enforce pay-per-prompt access settled in native **$APAY** tokens on BotChain EVM.
 
 ---
 
@@ -15,36 +15,44 @@ AgentPayAI implements the `@x402/express` middleware on its API gateway to enfor
 **EIP-3009** specifies a standardized protocol for delegating ERC-20 token transfers via offchain EIP-712 signed authorizations (`transferWithAuthorization`, `receiveWithAuthorization`, and `cancelAuthorization`).
 
 ### Why EIP-3009 for $APAY?
-1. **Gasless Micropayments**: Users and autonomous software agents sign offchain EIP-712 payment authorizations in their web/bot wallet without spending native gas or sending onchain transactions directly.
+1. **Gasless 1-Click Micropayments**: Users and autonomous software agents sign offchain EIP-712 payment authorizations in their web/bot wallet (`eth_signTypedData_v4`) without spending native gas or requiring separate gas approval steps.
 2. **Parallel Nonce Execution**: Unlike EIP-2612 (which relies on sequential nonces), EIP-3009 utilizes random 32-byte nonces (`bytes32 nonce`). This allows autonomous agents to issue multiple parallel AI requests simultaneously without transaction ordering deadlocks.
-3. **1-Click Native Settlement**: The x402 Facilitator receives the signed authorization from the request header and invokes `$APAY.transferWithAuthorization` on BotChain to settle the exact payment onchain in a single atomic call.
+3. **Sub-Second Response Latency**: The API gateway verifies the signature off-chain with BOF (`/verify`), executes the upstream AI prompt immediately, and settles the payment on-chain asynchronously (`/settle`), eliminating user wait time for block confirmations.
 
 ---
 
-## 4.3 Protocol Execution Steps
+## 4.3 Production Protocol Execution Flow
 
 ```
-[ Client / Bot ]            [ AgentPayAI Gateway ]          [ x402 Facilitator ]          [ APAYToken.sol (BotChain) ]
-       |                               |                             |                                  |
-       |--- 1. POST /api/chat -------->|                             |                                  |
-       |<-- 2. HTTP 402 Challenge -----|                             |                                  |
-       |    (Price: 1.0 $APAY)         |                             |                                  |
-       |                               |                             |                                  |
-       |--- 3. Sign EIP-712 Payload --->|                             |                                  |
-       |    (transferWithAuthorization)|                             |                                  |
-       |                               |                             |                                  |
-       |--- 4. POST + X-PAYMENT ------>|                             |                                  |
-       |                               |--- 5. Verify & Settle ----->|                                  |
-       |                               |                             |--- 6. transferWithAuth() ------->|
-       |                               |                             |<-- 7. Event Transfer ------------|
-       |<-- 8. Return AI Response -----|<-- 9. Settlement Confirmed -|                                  |
+[ Client / Bot UI ]          [ AgentPayAI Gateway ]          [ BOF Facilitator ]          [ APAYToken.sol (BotChain) ]
+        |                               |                            |                                  |
+        |--- 1. POST /api/chat -------->|                            |                                  |
+        |<-- 2. HTTP 402 Challenge -----|                            |                                  |
+        |    (Price: 1.0 $APAY)         |                            |                                  |
+        |                               |                            |                                  |
+        |--- 3. Sign EIP-712 Payload --->|                            |                                  |
+        |    (eth_signTypedData_v4)     |                            |                                  |
+        |                               |                            |                                  |
+        |--- 4. POST + X-Payment ------->|                            |                                  |
+        |    (base64 EIP-3009 Auth)     |--- 5. POST /verify ------->|                                  |
+        |                               |<-- 6. Valid + Signer -----|                                  |
+        |                               |                            |                                  |
+        |                               |--- 7. Execute AI Prompt -->| (Anthropic Claude)               |
+        |                               |<-- 8. Return AI Payload ---|                                  |
+        |                               |                            |                                  |
+        |<-- 9. Stream AI Response -----|                            |                                  |
+        |                               |--- 10. POST /settle (Async)|                                  |
+        |                               |                            |--- 11. transferWithAuth() ------>|
+        |                               |                            |<-- 12. On-Chain Receipt ---------|
 ```
 
-1. **Initial Request**: The client or autonomous bot issues an unpaid HTTP request (e.g. `POST /api/chat`).
-2. **Challenge**: The gateway returns `HTTP 402 Payment Required`, specifying the `$APAY` token asset address, price (1.0 `$APAY`), recipient vault address, and `exact` payment scheme.
-3. **EIP-712 Signature**: The client signs a typed `TransferWithAuthorization` payload containing `from`, `to`, `value`, `validAfter`, `validBefore`, and a unique random 32-byte `nonce`.
-4. **Onchain Settlement**: The gateway forwards the signature to the x402 Facilitator, which calls `$APAY.transferWithAuthorization` on BotChain.
-5. **Payload Fulfillment**: Upon settlement, the gateway invokes the Anthropic Claude AI inference model (`claude-opus-5`) and streams the result back to the client.
+1. **Initial Unpaid Request**: The client or bot submits a request to `/api/chat` without a payment header.
+2. **402 Challenge**: The gateway returns `HTTP 402 Payment Required` containing the `$APAY` token address, price (`1.0 $APAY`), recipient vault address, and network (`eip155:968`).
+3. **EIP-712 Signature**: The client signs an EIP-3009 `TransferWithAuthorization` payload in their wallet (0 gas).
+4. **Resend with Header**: The client resends the request with `X-Payment: base64(EIP3009AuthPayload)`.
+5. **Off-Chain Verification**: The gateway forwards the header to the BOF facilitator `/verify` endpoint to verify the EIP-712 signature and timestamp window off-chain in milliseconds.
+6. **Immediate Fulfillment**: The gateway executes the upstream Anthropic Claude AI inference model and returns the result back to the user instantly.
+7. **Asynchronous Settlement**: The gateway invokes BOF `/settle` asynchronously, broadcasting `transferWithAuthorization` on BotChain EVM without blocking the user response.
 
 ---
 
