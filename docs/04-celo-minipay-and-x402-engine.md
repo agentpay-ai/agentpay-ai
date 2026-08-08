@@ -56,7 +56,17 @@ AgentPayAI implements the `@x402/express` middleware on its API gateway to enfor
 
 ---
 
-## 4.4 Cryptographic Identity (ERC-8004) and Builder Attribution (ERC-8021)
+## 4.4 BOF (BotChain Open Facilitator) Engine Integration
+
+AgentPayAI leverages **[BOF (BotChain Open Facilitator)](https://github.com/agentpay-ai/BOF)** as its core payment verifier and relayer middleware:
+
+- **Verification Endpoint (`POST /verify`)**: AgentPayAI delegates off-chain signature validation to BOF. BOF recalculates the EIP-712 domain separator and struct hash, performs secp256k1 `ecrecover` to extract the signer address, checks timestamp bounds (`validAfter` / `validBefore`), and verifies non-spent status against its thread-safe `HashSet` nonce ledger.
+- **Settlement Endpoint (`POST /settle`)**: Once AI prompt fulfillment completes, AgentPayAI triggers BOF `/settle`. BOF uses its relayer wallet (`EVM_PRIVATE_KEY`) to broadcast `transferWithAuthorization` on BotChain RPCs (`rpc.bohr.life` / `rpc.botchain.ai`) in a gas-sponsored transaction, returning the `txHash` and `blockNumber`.
+- **Public Open Standard**: Beyond AgentPayAI, BOF provides an open public REST API for any third-party AI agent or dApp on BotChain to accept x402 micropayments effortlessly.
+
+---
+
+## 4.5 Cryptographic Identity (ERC-8004) and Builder Attribution (ERC-8021)
 
 ### ERC-8004 Agent Identity & Trust Registry
 AgentPayAI integrates onchain agent metadata descriptors conforming to ERC-8004 specifications:

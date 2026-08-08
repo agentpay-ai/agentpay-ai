@@ -9,6 +9,7 @@ AgentPayAI addresses this structural inefficiency by operating as a **decentrali
 1. **Bulk Compute Aggregation**: AgentPayAI secures enterprise API inference access from major AI model providers (Google Gemini, Anthropic Claude, OpenAI GPT-4o, xAI Grok, and synthetic image generators).
 2. **Fractionalization and Reselling**: The protocol fractionalizes bulk AI inference into granular, sub-cent pay-per-prompt units ($0.01 to $0.05 per call).
 3. **Onchain Micropayment Rail**: End-users and autonomous software bots purchase compute on-demand using self-custodial Web3 wallets settled in native **$APAY** tokens (EIP-3009 compliant) via the x402 HTTP payment protocol on BotChain.
+4. **BOF Facilitator Integration**: Powered by **[BOF (BotChain Open Facilitator)](https://github.com/agentpay-ai/BOF)** — an open-source Rust microservice developed by AgentPay AI to handle off-chain EIP-712 signature verification and gas-sponsored on-chain settlement on BotChain EVM.
 
 By decoupling access from monthly recurring SaaS subscriptions, providing native token utility ($APAY prompt fee discounts and staking), and attaching cryptographic proof of execution to every request, AgentPayAI establishes a universal payment and identity layer for human users and autonomous agents alike.
 
@@ -31,7 +32,7 @@ BotChain provides the foundational decentralized network for autonomous bots, ma
 
 The AgentPayAI protocol introduces four primary technical innovations:
 
-1. **Native x402 EIP-3009 Settlement Core**: Gasless EIP-712 pay-per-prompt settlement in native **$APAY** tokens (EIP-3009 compliant) via the x402 protocol on BotChain.
+1. **Native x402 EIP-3009 Settlement Core via BOF**: Gasless EIP-712 pay-per-prompt settlement in native **$APAY** tokens (EIP-3009 compliant) via the x402 protocol and BOF facilitator engine on BotChain.
 2. **Sub-Cent Unit Economics & $APAY Utility**: Transaction settlement scaled down to 1.0 $APAY for text prompts, 2.0 $APAY for code audits, and 5.0 $APAY for high-resolution image rendering.
 3. **Cryptographic Builder Attribution**: ERC-8021 metadata tags appended to transaction call data, providing immutable onchain proof of origin for leaderboard indexing and grant allocation tracking.
 4. **Multi-Model Intelligence Network**: A modular gateway architecture capable of dynamically routing queries between cost-effective development tiers and high-reasoning production models (Claude 3.5 Opus, GPT-4o, Grok).
@@ -46,4 +47,5 @@ The AgentPayAI protocol introduces four primary technical innovations:
 | Minimum Transaction Unit | 1.0 $APAY | Enables granular per-token or per-inference billing |
 | Token Utility | $APAY Native | EIP-3009 gasless transfers, tier staking, bot collateral |
 | Gas Friction | 0 Native Gas Required | EIP-3009 transferWithAuthorization allows gasless user signatures |
+| Facilitator Engine | BOF (BotChain Open Facilitator) | Rust Axum engine performing ecrecover & relayer broadcast |
 | Onchain Auditability | 100% Verified | Every inference request corresponds to a verifiable onchain transaction |
